@@ -1,0 +1,137 @@
+/**
+ * Utilities for CSV Export, WhatsApp Sharing, and Daily Slip Printing
+ */
+
+import { formatINR, formatDate, formatTime } from './formatters';
+
+export const exportTransactionsToCSV = (transactions, portalsMap, filename = 'Daily_Hisab_Transactions.csv') => {
+  if (!transactions || transactions.length === 0) {
+    alert('No transactions to export.');
+    return;
+  }
+
+  const headers = ['ID', 'Time', 'Type', 'Customer Name', 'Phone', 'Portal', 'Amount (Rs)', 'Commission (Rs)', 'Remark'];
+  
+  const rows = transactions.map(tx => [
+    tx.id,
+    tx.time || '',
+    tx.type,
+    `"${(tx.customerName || 'Cash').replace(/"/g, '""')}"`,
+    tx.customerPhone || '',
+    `"${(portalsMap[tx.portalId]?.name || tx.portalId || '-').replace(/"/g, '""')}"`,
+    tx.amount,
+    tx.commission || 0,
+    `"${(tx.remark || '').replace(/"/g, '""')}"`
+  ]);
+
+  const csvContent = 'data:text/csv;charset=utf-8,' + 
+    [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+export const exportCustomerLedgerToCSV = (customers, filename = 'Customer_Khata_Ledger.csv') => {
+  if (!customers || customers.length === 0) {
+    alert('No customers to export.');
+    return;
+  }
+
+  const headers = ['Customer ID', 'Name', 'Phone', 'Address / Reference', 'Total Jama (Rs)', 'Total Liya (Rs)', 'Net Balance (Rs)', 'Status'];
+  
+  const rows = customers.map(c => {
+    const net = (c.totalJama || 0) - (c.totalLiya || 0);
+    const status = net < 0 ? `Pending Due (Rs ${Math.abs(net)})` : (net > 0 ? `Advance Balance (Rs ${net})` : 'Settled / Nil');
+    return [
+      c.id,
+      `"${c.name.replace(/"/g, '""')}"`,
+      c.phone || '',
+      `"${(c.reference || '').replace(/"/g, '""')}"`,
+      c.totalJama || 0,
+      c.totalLiya || 0,
+      net,
+      `"${status}"`
+    ];
+  });
+
+  const csvContent = 'data:text/csv;charset=utf-8,' + 
+    [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+export const generateCustomerWhatsAppUrl = (customer, transactions = [], shopName = 'Jan Seva Kendra') => {
+  const net = (customer.totalJama || 0) - (customer.totalLiya || 0);
+  let balanceText = '';
+  
+  if (net < 0) {
+    balanceText = `⚠️ *Pending Balance (Due):* ${formatINR(Math.abs(net))}\nKindly clear the pending balance at your earliest convenience.`;
+  } else if (net > 0) {
+    balanceText = `✅ *Advance Credit Balance:* ${formatINR(net)}`;
+  } else {
+    balanceText = `✅ *Account Status:* Account Fully Settled (Balance Nil)`;
+  }
+
+  const recentTxText = transactions
+    .slice(0, 5)
+    .map(t => `• ${formatDate(t.date)} ${t.time || ''}: ${t.type === 'JAMA' ? '🟢 Deposit' : '🔴 Withdrawal'} ${formatINR(t.amount)} (${t.remark || 'N/A'})`)
+    .join('\n');
+
+  const message = `*${shopName}*
+*Customer Ledger Statement*
+--------------------------------
+👤 *Customer:* ${customer.name}
+📞 *Phone:* ${customer.phone || 'N/A'}
+📅 *Date:* ${formatDate(new Date())}
+
+📊 *Account Summary:*
+• Total Deposit (Jama): ${formatINR(customer.totalJama || 0)}
+• Total Withdrawal (Liya): ${formatINR(customer.totalLiya || 0)}
+--------------------------------
+${balanceText}
+--------------------------------
+📜 *Recent Transactions:*
+${recentTxText || 'No recent transactions'}
+
+Thank you! 🙏
+*${shopName}*`;
+
+  const encoded = encodeURIComponent(message);
+  const phone = (customer.phone || '').replace(/[^0-9]/g, '');
+  const cleanPhone = phone.length === 10 ? `91${phone}` : phone;
+  
+  return cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+};
+
+export const generateDailyHisabWhatsAppUrl = (shopName, date, summary, branchName) => {
+  const message = `*${shopName} (${branchName})*
+*Daily Closing Hisab Report*
+📅 *Date:* ${formatDate(date)}
+--------------------------------
+💰 *Cash In Hand:*
+• Morning Opening Cash: ${formatINR(summary.openingCash)}
+• Cash Deposits (Jama/DMT): +${formatINR(summary.totalJamaCash)}
+• Cash Payouts (AEPS/Liya): -${formatINR(summary.totalLiyaCash)}
+• Bank/ATM Withdrawals: +${formatINR(summary.totalTransfersIn)}
+• Wallet Top-up Cash Paid: -${formatINR(summary.totalTransfersOut)}
+• Daily Shop Expenses: -${formatINR(summary.totalExpenses)}
+--------------------------------
+💵 *Expected Closing Cash: ${formatINR(summary.expectedClosingCash)}*
+💼 *Total 10 Portals Liquidity: ${formatINR(summary.totalPortalClosing)}*
+📈 *Net Commission Earned: ${formatINR(summary.netDailyProfit)}*
+--------------------------------
+_Generated by Jan Seva Kendra Hisab Portal_`;
+
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+};

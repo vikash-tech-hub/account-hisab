@@ -6,6 +6,7 @@ import {
   Landmark,
   ArrowDownLeft,
   ArrowUpRight,
+  Receipt,
   WalletCards,
   Sparkles
 } from 'lucide-react';
@@ -16,6 +17,8 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
     totalBankBalance,
     totalJamaAmount,
     totalLiyaAmount,
+    totalExpenses,
+    todaysExpenses,
     netTotalCapital,
     activePortals,
     activeBankAccounts,
@@ -63,13 +66,23 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
       icon: ArrowUpRight,
       color: 'from-rose-500/10 to-red-500/10 border-rose-500/30 text-rose-400',
       badgeColor: 'bg-rose-500/20 text-rose-300'
+    },
+    {
+      id: 'expenses',
+      title: '5. Shop Expenses & Spend',
+      subtitle: 'दुकान के दैनिक खर्चे (Spend/Bill)',
+      amount: totalExpenses,
+      count: `${todaysExpenses.length} Records`,
+      icon: Receipt,
+      color: 'from-purple-500/10 to-pink-500/10 border-pink-500/30 text-pink-400',
+      badgeColor: 'bg-pink-500/20 text-pink-300'
     }
   ];
 
   return (
     <div className="space-y-4">
-      {/* 4 Core Pillars Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {/* 5 Core Pillars Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
         {cards.map((c) => {
           const Icon = c.icon;
           const isSelected = activeSection === c.id;

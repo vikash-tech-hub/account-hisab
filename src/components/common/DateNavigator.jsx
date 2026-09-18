@@ -16,7 +16,8 @@ export const DateNavigator = () => {
     setSelectedDate,
     shiftDateBy,
     availableHistoryDates,
-    activeBranch
+    activeBranch,
+    carryForwardAllYesterday
   } = useHisab();
 
   const isToday = selectedDate === '2026-09-16';
@@ -111,6 +112,16 @@ export const DateNavigator = () => {
         >
           <span className="hidden sm:inline">Next Day</span>
           <ChevronRight className="w-4 h-4" />
+        </button>
+
+        {/* 1-Click Carry Forward Button */}
+        <button
+          onClick={carryForwardAllYesterday}
+          className="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+          title="कल का क्लोजिंग बैलेंस आज के ओपनिंग में लोड करें"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>⚡ कल का बैलेंस लाएं</span>
         </button>
 
         {/* Custom Calendar Date Input */}

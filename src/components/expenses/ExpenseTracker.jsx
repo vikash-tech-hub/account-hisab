@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useHisab } from '../../context/HisabContext';
-import { formatINR, formatTime } from '../../utils/formatters';
-import { Badge } from '../common/Badge';
+import { formatINR } from '../../utils/formatters';
 import {
   Receipt,
   Plus,
@@ -10,103 +9,159 @@ import {
   FileText,
   Zap,
   Building,
-  Tag
+  Tag,
+  Wallet,
+  Sparkles,
+  TrendingDown,
+  Clock,
+  Landmark,
+  Layers
 } from 'lucide-react';
 
 const CATEGORIES = [
-  { id: 'CHAI_SNACKS', name: 'Tea & Refreshments', icon: Coffee, color: 'text-amber-400' },
-  { id: 'STATIONERY', name: 'Stationery & A4 Paper', icon: FileText, color: 'text-sky-400' },
-  { id: 'ELECTRICITY_INTERNET', name: 'Electricity & Broadband Bill', icon: Zap, color: 'text-yellow-400' },
-  { id: 'RENT', name: 'Shop Rent', icon: Building, color: 'text-indigo-400' },
-  { id: 'OTHER', name: 'Miscellaneous Expenses', icon: Tag, color: 'text-slate-400' }
+  { id: 'CHAI_SNACKS', name: 'चाय व नाश्ता (Tea & Snacks)', icon: Coffee, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30' },
+  { id: 'STATIONERY', name: 'प्रिंटिंग पेपर व स्टेशनरी (A4 / POS)', icon: FileText, color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/30' },
+  { id: 'ELECTRICITY_INTERNET', name: 'बिजली व इंटरनेट बिल (Utilities)', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' },
+  { id: 'RENT', name: 'दुकान किराया (Shop Rent)', icon: Building, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/30' },
+  { id: 'STAFF', name: 'स्टाफ सैलरी / दिहाड़ी (Staff Wages)', icon: Wallet, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' },
+  { id: 'OTHER', name: 'अन्य विविध खर्च (Miscellaneous)', icon: Tag, color: 'text-slate-400', bg: 'bg-slate-800/60 border-slate-700' }
+];
+
+const QUICK_EXPENSE_PRESETS = [
+  { title: 'Morning Tea & Samosa', amount: 80, category: 'CHAI_SNACKS' },
+  { title: 'Afternoon Tea', amount: 50, category: 'CHAI_SNACKS' },
+  { title: 'A4 Paper Bundle (500 sheets)', amount: 320, category: 'STATIONERY' },
+  { title: 'POS Printer Rolls Pack', amount: 150, category: 'STATIONERY' },
+  { title: 'Broadband / WiFi Bill', amount: 599, category: 'ELECTRICITY_INTERNET' },
+  { title: 'Shop Cleaning Expense', amount: 100, category: 'OTHER' }
 ];
 
 export const ExpenseTracker = () => {
-  const { todaysExpenses, addExpense, deleteExpense, dailySummary, activeBranch } = useHisab();
+  const {
+    todaysExpenses,
+    totalExpenses,
+    addExpense,
+    deleteExpense,
+    activeBranch,
+    activeBankAccounts,
+    selectedDate
+  } = useHisab();
 
-  const [formData, setFormData] = useState({
-    title: '',
-    amount: '',
-    category: 'CHAI_SNACKS',
-    remark: ''
-  });
+  const [title, setTitle] = useState('');
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('CHAI_SNACKS');
+  const [paymentMode, setPaymentMode] = useState('Cash in Hand');
+  const [vendor, setVendor] = useState('');
+  const [remark, setRemark] = useState('');
 
   const handleAddExpense = (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.amount) {
-      alert('Please enter the expense title and amount.');
-      return;
-    }
+    if (!title || !amount) return;
 
     addExpense({
-      ...formData,
-      amount: Number(formData.amount)
+      title,
+      amount: Number(amount),
+      category,
+      paymentMode,
+      vendor,
+      remark
     });
 
-    setFormData({
-      title: '',
-      amount: '',
-      category: 'CHAI_SNACKS',
-      remark: ''
-    });
+    setTitle('');
+    setAmount('');
+    setVendor('');
+    setRemark('');
+  };
+
+  const applyPreset = (preset) => {
+    setTitle(preset.title);
+    setAmount(preset.amount);
+    setCategory(preset.category);
   };
 
   // Category breakdown
   const categoryTotals = useMemo(() => {
     const totals = {};
-    todaysExpenses.forEach(exp => {
+    todaysExpenses.forEach((exp) => {
       totals[exp.category] = (totals[exp.category] || 0) + Number(exp.amount || 0);
     });
     return totals;
   }, [todaysExpenses]);
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-bold text-white tracking-wide">
-              Daily Shop Expenses Tracker
-            </h2>
-            <Badge variant="danger">
-              <Receipt className="w-3.5 h-3.5" />
-              {todaysExpenses.length} Expenses Recorded
-            </Badge>
+    <div className="bg-slate-900/95 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xl space-y-5">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 shrink-0">
+            <Receipt className="w-6 h-6" />
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Branch: <span className="text-indigo-400 font-semibold">{activeBranch.name}</span> | Log daily tea, printing supplies, utilities and rent
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-white tracking-wide">
+                Daily Shop Expenses & Spend Tracker (दुकान के दैनिक खर्चे)
+              </h3>
+              <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold">
+                {todaysExpenses.length} Records
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              दुकान के चाय-नाश्ता, बिजली, इंटरनेट, किराया और स्टेशनरी खर्च दर्ज करें
+            </p>
+          </div>
         </div>
 
-        <div className="bg-slate-950/80 px-4 py-2 rounded-xl border border-slate-800 text-right">
-          <div className="text-[10px] uppercase font-bold text-slate-400">Total Expenses Today</div>
-          <div className="text-xl font-extrabold font-mono text-rose-400">
-            {formatINR(dailySummary.totalExpenses)}
-          </div>
+        {/* Total Expense Badge */}
+        <div className="bg-slate-950 px-4 py-2 rounded-xl border border-rose-500/30 text-right shrink-0">
+          <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Expenses Today</span>
+          <span className="text-xl font-black font-mono text-rose-400">
+            -{formatINR(totalExpenses)}
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left Col: Add Expense Form */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider pb-3 border-b border-slate-800 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-indigo-400" />
-            <span>Add New Expense</span>
-          </h3>
+      {/* Quick 1-Click Preset Chips */}
+      <div className="space-y-1.5">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>Quick 1-Click Expense Presets (तुरंत जोड़ने के लिए चुनें):</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {QUICK_EXPENSE_PRESETS.map((p, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => applyPreset(p)}
+              className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800 text-xs text-slate-300 font-medium transition-all flex items-center gap-1.5 active:scale-95"
+            >
+              <span>{p.title}</span>
+              <span className="font-mono font-bold text-rose-400">₹{p.amount}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
-          <form onSubmit={handleAddExpense} className="space-y-4">
+      {/* Main Grid: Left Add Expense Form + Right Expense Log */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        {/* LEFT: Add Expense Form (4 Cols) */}
+        <div className="lg:col-span-4 bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-4">
+          <h4 className="text-xs font-bold text-white uppercase tracking-wider pb-2 border-b border-slate-800 flex items-center gap-1.5">
+            <Plus className="w-4 h-4 text-rose-400" />
+            <span>+ Add New Expense (नया खर्च जोड़ें)</span>
+          </h4>
+
+          <form onSubmit={handleAddExpense} className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Expense Category
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                Category (खर्च की श्रेणी) *
               </label>
               <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
               >
-                {CATEGORIES.map(cat => (
+                {CATEGORIES.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
                   </option>
@@ -115,25 +170,25 @@ export const ExpenseTracker = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Title / Purpose *
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                Expense Title / Purpose (खर्च का विवरण) *
               </label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Morning Tea & Biscuits"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                placeholder="e.g. Morning Tea & Samosa"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Amount (₹) *
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                Amount (रकम ₹) *
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
                   ₹
                 </span>
                 <input
@@ -141,55 +196,75 @@ export const ExpenseTracker = () => {
                   required
                   min="1"
                   placeholder="0"
-                  value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-7 pr-3 py-2 text-xs font-mono font-bold text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-sm font-mono font-bold text-rose-400 focus:outline-none focus:border-rose-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Vendor / Remark
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                Paid From (भुगतान माध्यम)
+              </label>
+              <select
+                value={paymentMode}
+                onChange={(e) => setPaymentMode(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+              >
+                <option value="Cash in Hand">Cash in Hand (गल्ला नकद)</option>
+                {activeBankAccounts.map((b) => (
+                  <option key={b.id} value={b.name}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                Vendor / Remark (Optional)
               </label>
               <input
                 type="text"
                 placeholder="e.g. Pappu Tea Stall"
-                value={formData.remark}
-                onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                value={vendor}
+                onChange={(e) => setVendor(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition-all flex items-center justify-center gap-1.5 active:scale-95"
             >
-              <Receipt className="w-4 h-4" />
-              <span>Record Expense</span>
+              <Plus className="w-4 h-4" />
+              <span>Record Expense (खर्च दर्ज करें)</span>
             </button>
           </form>
         </div>
 
-        {/* Right 2 Cols: Expense List & Category Breakdown */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* RIGHT: Category Breakdown Cards + Expense Table (8 Cols) */}
+        <div className="lg:col-span-8 space-y-4">
           
-          {/* Category Quick Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {CATEGORIES.slice(0, 4).map(cat => {
+          {/* Category Summary Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            {CATEGORIES.map((cat) => {
               const Icon = cat.icon;
               const total = categoryTotals[cat.id] || 0;
               return (
                 <div
                   key={cat.id}
-                  className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl flex items-center gap-3"
+                  className={`p-3 rounded-xl border flex items-center gap-2.5 ${cat.bg}`}
                 >
-                  <div className={`p-2 rounded-lg bg-slate-950 ${cat.color}`}>
+                  <div className={`p-2 rounded-lg bg-slate-950 shrink-0 ${cat.color}`}>
                     <Icon className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] text-slate-400 truncate">{cat.name}</div>
-                    <div className="text-xs font-mono font-bold text-white">
+                    <div className="text-[10px] text-slate-300 font-semibold truncate">
+                      {cat.name.split('(')[0]}
+                    </div>
+                    <div className="text-xs font-mono font-black text-white">
                       {formatINR(total)}
                     </div>
                   </div>
@@ -198,69 +273,76 @@ export const ExpenseTracker = () => {
             })}
           </div>
 
-          {/* Today's Expense Table */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider pb-3 border-b border-slate-800">
-              Today's Expenses Log
-            </h3>
+          {/* Today's Expense Records Table */}
+          <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                Today's Expense Statement ({todaysExpenses.length})
+              </h4>
+              <span className="text-[11px] font-mono font-bold text-rose-400">
+                Total: -{formatINR(totalExpenses)}
+              </span>
+            </div>
 
             {todaysExpenses.length === 0 ? (
               <div className="py-12 text-center text-xs text-slate-500">
-                No expenses recorded for today yet.
+                No expenses recorded for today yet. Use the left form or presets above.
               </div>
             ) : (
-              <div className="overflow-x-auto mt-2">
-                <table className="w-full text-left text-xs">
+              <div className="overflow-x-auto max-h-[380px] overflow-y-auto">
+                <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-800 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                      <th className="py-2.5 px-3">Time / Category</th>
-                      <th className="py-2.5 px-3">Title / Purpose</th>
-                      <th className="py-2.5 px-3">Vendor / Remark</th>
+                    <tr className="border-b border-slate-800 text-[10px] font-bold uppercase text-slate-400 bg-slate-900/80 sticky top-0">
+                      <th className="py-2.5 px-3">Time</th>
+                      <th className="py-2.5 px-3">Category</th>
+                      <th className="py-2.5 px-3">Purpose / Title</th>
+                      <th className="py-2.5 px-3">Paid Via</th>
                       <th className="py-2.5 px-3 text-right">Amount (₹)</th>
                       <th className="py-2.5 px-3 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {todaysExpenses.map((exp) => {
-                      const catConfig = CATEGORIES.find(c => c.id === exp.category) || CATEGORIES[4];
+                      const catConfig =
+                        CATEGORIES.find((c) => c.id === exp.category) || CATEGORIES[5];
                       const Icon = catConfig.icon;
 
                       return (
-                        <tr key={exp.id} className="hover:bg-slate-800/30">
-                          <td className="py-2.5 px-3 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-slate-400 text-[11px]">
-                                {formatTime(exp.time)}
-                              </span>
-                              <span className="flex items-center gap-1 text-[11px] bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-slate-300">
-                                <Icon className={`w-3 h-3 ${catConfig.color}`} />
-                                <span>{catConfig.name}</span>
-                              </span>
-                            </div>
+                        <tr key={exp.id} className="hover:bg-slate-800/40 transition-colors">
+                          <td className="py-2.5 px-3 font-mono text-[11px] text-slate-400">
+                            {exp.time || '10:00 AM'}
                           </td>
-
-                          <td className="py-2.5 px-3 font-semibold text-white">
-                            {exp.title}
+                          <td className="py-2.5 px-3">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-300">
+                              <Icon className={`w-3 h-3 ${catConfig.color}`} />
+                              <span>{catConfig.name.split('(')[0]}</span>
+                            </span>
                           </td>
-
-                          <td className="py-2.5 px-3 text-slate-400 text-[11px]">
-                            {exp.remark || '-'}
+                          <td className="py-2.5 px-3 font-bold text-white">
+                            <div>{exp.title}</div>
+                            {exp.vendor && (
+                              <div className="text-[10px] text-slate-400 font-normal">
+                                {exp.vendor}
+                              </div>
+                            )}
                           </td>
-
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap font-mono font-bold text-rose-400">
+                          <td className="py-2.5 px-3 text-slate-300 text-[11px]">
+                            {exp.paymentMode || 'Cash in Hand'}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-mono font-black text-rose-400">
                             -{formatINR(exp.amount)}
                           </td>
-
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                          <td className="py-2.5 px-3 text-right">
                             <button
                               onClick={() => {
-                                if (window.confirm('Do you want to delete this expense record?')) {
+                                if (window.confirm(`Delete expense "${exp.title}"?`)) {
                                   deleteExpense(exp.id);
                                 }
                               }}
-                              className="p-1 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
+                              className="p-1 text-slate-500 hover:text-rose-400 rounded transition-colors"
+                              title="Delete Expense"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </td>
                         </tr>

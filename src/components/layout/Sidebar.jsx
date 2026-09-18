@@ -3,6 +3,8 @@ import {
   LayoutDashboard,
   CreditCard,
   Landmark,
+  Users,
+  Receipt,
   ArrowDownLeft,
   ArrowUpRight,
   TrendingUp,
@@ -47,18 +49,18 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
       badge: 'Cash/Bank'
     },
     {
-      id: 'jama',
-      label: '3. People Deposited (Jama)',
-      sublabel: 'Money Deposited by Customers',
-      icon: ArrowDownLeft,
-      badge: 'Deposits'
+      id: 'people',
+      label: '3 & 4. Party & People Master',
+      sublabel: 'Customer Ledger (Jama & Liya)',
+      icon: Users,
+      badge: 'Master'
     },
     {
-      id: 'liya',
-      label: '4. People Took (Liya)',
-      sublabel: 'AEPS & Cash Taken / Dues',
-      icon: ArrowUpRight,
-      badge: 'Payouts'
+      id: 'expenses',
+      label: 'Shop Expenses & Spend',
+      sublabel: 'Tea, Paper, Bills (दुकान खर्च)',
+      icon: Receipt,
+      badge: 'Kharcha'
     },
     {
       id: 'profit',

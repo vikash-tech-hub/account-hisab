@@ -8,6 +8,8 @@ import { DateNavigator } from './components/common/DateNavigator';
 import { HisabSummaryOverview } from './components/dashboard/HisabSummaryOverview';
 import { PortalsPillar } from './components/pillars/PortalsPillar';
 import { BankAccountsPillar } from './components/pillars/BankAccountsPillar';
+import { PeopleMasterPillar } from './components/pillars/PeopleMasterPillar';
+import { ExpenseTracker } from './components/expenses/ExpenseTracker';
 import { JamaPillar } from './components/pillars/JamaPillar';
 import { LiyaPillar } from './components/pillars/LiyaPillar';
 import { ProfitChartSection } from './components/analytics/ProfitChartSection';
@@ -58,11 +60,11 @@ const MainContent = () => {
               {/* Pillar 2: Bank Accounts & Cash */}
               <BankAccountsPillar />
 
-              {/* 2-Column Grid for Jama (Deposited) and Liya (Withdrawn) */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <JamaPillar />
-                <LiyaPillar />
-              </div>
+              {/* Pillar 3 & 4: Unified People & Party Master (Jama & Liya) */}
+              <PeopleMasterPillar />
+
+              {/* Daily Shop Expenses Tracker */}
+              <ExpenseTracker />
 
               {/* Profit & Earnings Chart on Dashboard */}
               <ProfitChartSection />
@@ -81,15 +83,15 @@ const MainContent = () => {
             </div>
           )}
 
-          {activeTab === 'jama' && (
+          {(activeTab === 'people' || activeTab === 'jama' || activeTab === 'liya') && (
             <div className="animate-fadeIn">
-              <JamaPillar />
+              <PeopleMasterPillar />
             </div>
           )}
 
-          {activeTab === 'liya' && (
+          {activeTab === 'expenses' && (
             <div className="animate-fadeIn">
-              <LiyaPillar />
+              <ExpenseTracker />
             </div>
           )}
 

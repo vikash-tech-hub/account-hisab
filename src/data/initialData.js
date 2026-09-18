@@ -18,6 +18,21 @@ export const INITIAL_BRANCHES = [
   }
 ];
 
+// Unified Customer Master List (ग्राहक / पार्टी मास्टर)
+export const INITIAL_CUSTOMERS = [
+  { id: 'c1', name: 'Ramesh Kumar Verma (Dairy)', phone: '9839123456', category: 'Dairy Vendor', address: 'Market Road' },
+  { id: 'c2', name: 'Sunita Devi (Kirana Store)', phone: '9415234567', category: 'Shopkeeper', address: 'Chowk Bazar' },
+  { id: 'c3', name: 'Rajesh Yadav (Transport)', phone: '9935345678', category: 'Transporter', address: 'Highway Bypass' },
+  { id: 'c4', name: 'Mohd. Imran (Auto Garage)', phone: '9335567890', category: 'Auto Garage', address: 'Station Road' },
+  { id: 'c5', name: 'Pooja Sharma (Teacher)', phone: '9889456789', category: 'Govt Teacher', address: 'Civil Lines' },
+  { id: 'c6', name: 'Santosh Rawat (Farmer)', phone: '9450129988', category: 'Farmer', address: 'Gram Rampur' },
+  { id: 'c7', name: 'Vikas Gupta (Mobile Shop)', phone: '9792112233', category: 'Retailer', address: 'Main Bazar' },
+  { id: 'c8', name: 'Kavita Singh (Asha Worker)', phone: '9415887766', category: 'Asha Worker', address: 'Hospital Road' },
+  { id: 'c9', name: 'Sunil Pandey (Contractor)', phone: '9839554433', category: 'Contractor', address: 'Indiranagar' },
+  { id: 'c10', name: 'Dinesh Chandra (Hotel Shivam)', phone: '9450678901', category: 'Hotel Owner', address: 'Station Road' },
+  { id: 'c11', name: 'Anita Maurya (SHG Group)', phone: '9125789012', category: 'SHG Leader', address: 'Gram Kalyanpur' }
+];
+
 // Portals by `${branchId}_${date}`
 export const INITIAL_DAILY_PORTALS = {
   // Today (2026-09-16) - Branch 1
@@ -292,5 +307,121 @@ export const INITIAL_LIYA_RECORDS = [
     portalOrAccount: 'Fino Bank (Br 2)',
     time: '11:30 AM',
     note: 'SHG savings withdrawal payout'
+  }
+];
+
+// Daily Shop Expenses & Spend records (दुकान के दैनिक खर्चे)
+export const INITIAL_EXPENSES = [
+  // Today (2026-09-16) - Branch 1
+  {
+    id: 'exp-1',
+    branchId: 'branch-1',
+    date: '2026-09-16',
+    title: 'Morning Tea & Samosa Refreshment',
+    amount: 180,
+    category: 'CHAI_SNACKS',
+    paymentMode: 'Cash in Hand',
+    vendor: 'Pappu Tea Stall',
+    remark: 'For shop operator & customer hospitality',
+    time: '10:15 AM'
+  },
+  {
+    id: 'exp-2',
+    branchId: 'branch-1',
+    date: '2026-09-16',
+    title: 'JK Copier A4 Paper Bundle (1 Box / 500 Sheets)',
+    amount: 320,
+    category: 'STATIONERY',
+    paymentMode: 'Cash in Hand',
+    vendor: 'Gupta Stationery Mart',
+    remark: 'For customer receipts & printouts',
+    time: '12:30 PM'
+  },
+  {
+    id: 'exp-3',
+    branchId: 'branch-1',
+    date: '2026-09-16',
+    title: 'Broadband Fiber Internet Recharge (300 Mbps)',
+    amount: 599,
+    category: 'ELECTRICITY_INTERNET',
+    paymentMode: 'SBI Main Current A/C',
+    vendor: 'Airtel Xstream Fiber',
+    remark: 'Monthly high-speed connection for portals',
+    time: '02:00 PM'
+  },
+  {
+    id: 'exp-4',
+    branchId: 'branch-1',
+    date: '2026-09-16',
+    title: 'Shop Cleaning & Waste Disposal',
+    amount: 100,
+    category: 'OTHER',
+    paymentMode: 'Cash in Hand',
+    vendor: 'Local Cleaner',
+    remark: 'Daily shop upkeep',
+    time: '06:00 PM'
+  },
+  // Yesterday (2026-09-15) - Branch 1
+  {
+    id: 'exp-prev-1',
+    branchId: 'branch-1',
+    date: '2026-09-15',
+    title: 'Tea & Refreshments',
+    amount: 140,
+    category: 'CHAI_SNACKS',
+    paymentMode: 'Cash in Hand',
+    vendor: 'Pappu Tea Stall',
+    remark: '',
+    time: '11:00 AM'
+  },
+  {
+    id: 'exp-prev-2',
+    branchId: 'branch-1',
+    date: '2026-09-15',
+    title: 'Thermal Printer Paper Rolls (Pack of 5)',
+    amount: 250,
+    category: 'STATIONERY',
+    paymentMode: 'Cash in Hand',
+    vendor: 'City Mart',
+    remark: 'POS slip printing rolls',
+    time: '03:15 PM'
+  },
+  // Day Before Yesterday (2026-09-14)
+  {
+    id: 'exp-prev-3',
+    branchId: 'branch-1',
+    date: '2026-09-14',
+    title: 'Electricity Power Backup / Inverter Battery Water',
+    amount: 200,
+    category: 'ELECTRICITY_INTERNET',
+    paymentMode: 'Cash in Hand',
+    vendor: 'Battery Shop',
+    remark: 'Distilled water refill',
+    time: '01:00 PM'
+  },
+  {
+    id: 'exp-prev-4',
+    branchId: 'branch-1',
+    date: '2026-09-14',
+    title: 'Tea & Snacks',
+    amount: 150,
+    category: 'CHAI_SNACKS',
+    paymentMode: 'Cash in Hand',
+    vendor: 'Pappu Tea Stall',
+    remark: '',
+    time: '11:30 AM'
+  },
+  // Branch 2 Today
+  {
+    id: 'exp-b2-1',
+    branchId: 'branch-2',
+    date: '2026-09-16',
+    title: 'Tea & Biscuits',
+    amount: 120,
+    category: 'CHAI_SNACKS',
+    paymentMode: 'Cash in Hand',
+    vendor: 'Station Tea Stall',
+    remark: '',
+    time: '10:30 AM'
   }
 ];

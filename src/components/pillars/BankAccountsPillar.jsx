@@ -1,35 +1,38 @@
 import React, { useState } from 'react';
 import { useHisab } from '../../context/HisabContext';
 import { formatINR } from '../../utils/formatters';
-import { Landmark, Plus, Trash2, Edit2, Check, Wallet } from 'lucide-react';
+import {
+  Landmark,
+  Plus,
+  Trash2,
+  Zap,
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  Layers,
+  Sparkles
+} from 'lucide-react';
 
 export const BankAccountsPillar = () => {
-  const { activeBankAccounts, totalBankBalance, updateBankAccount, addBankAccount, deleteBankAccount } = useHisab();
+  const {
+    activeBankAccounts,
+    totalBankBalance,
+    updateBankAccount,
+    setBankAccountDirectTodayBalance,
+    addBankAccount,
+    deleteBankAccount,
+    carryForwardAllYesterday,
+    selectedDate,
+    getPreviousDateString
+  } = useHisab();
+
   const [isAdding, setIsAdding] = useState(false);
+  const [entryMode, setEntryMode] = useState('direct'); // 'direct' (Aaj ka balance) or 'detailed'
   const [newAccName, setNewAccName] = useState('');
   const [newAccType, setNewAccType] = useState('BANK');
   const [newAccOpening, setNewAccOpening] = useState('');
 
-  const [editingId, setEditingId] = useState(null);
-  const [editValues, setEditValues] = useState({ opening: '', deposits: '', withdrawals: '' });
-
-  const handleStartEdit = (acc) => {
-    setEditingId(acc.id);
-    setEditValues({
-      opening: acc.opening,
-      deposits: acc.deposits,
-      withdrawals: acc.withdrawals
-    });
-  };
-
-  const handleSaveEdit = (accId) => {
-    updateBankAccount(accId, {
-      opening: Number(editValues.opening || 0),
-      deposits: Number(editValues.deposits || 0),
-      withdrawals: Number(editValues.withdrawals || 0)
-    });
-    setEditingId(null);
-  };
+  const yesterdayDate = getPreviousDateString ? getPreviousDateString(selectedDate) : 'कल';
 
   const handleAddSubmit = (e) => {
     e.preventDefault();
@@ -46,10 +49,28 @@ export const BankAccountsPillar = () => {
     setIsAdding(false);
   };
 
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextInput = document.getElementById(`bank-input-${index + 1}`);
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevInput = document.getElementById(`bank-input-${index - 1}`);
+      if (prevInput) {
+        prevInput.focus();
+        prevInput.select();
+      }
+    }
+  };
+
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-2">
             <Landmark className="w-5 h-5 text-sky-400" />
@@ -58,11 +79,49 @@ export const BankAccountsPillar = () => {
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Opening Balance + Today's Deposits - Today's Withdrawals = Net Available Bank & Cash Balance
+            कल का क्लोजिंग = आज का ओपनिंग | सिर्फ आज का बैंक या गल्ले का बैलेंस भरें
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Action Controls & Total */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Mode Switcher */}
+          <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center text-xs">
+            <button
+              onClick={() => setEntryMode('direct')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                entryMode === 'direct'
+                  ? 'bg-sky-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>आज का बैलेंस (Quick)</span>
+            </button>
+            <button
+              onClick={() => setEntryMode('detailed')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                entryMode === 'detailed'
+                  ? 'bg-sky-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Deposits / Withdrawals</span>
+            </button>
+          </div>
+
+          {/* 1-Click Carry Forward Button */}
+          <button
+            onClick={carryForwardAllYesterday}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-bold transition-all shadow-sm"
+            title="कल का क्लोजिंग बैलेंस आज के ओपनिंग में कॉपी करें"
+          >
+            <Zap className="w-4 h-4 text-sky-400" />
+            <span>⚡ कल का बैलेंस लाएं ({yesterdayDate})</span>
+          </button>
+
+          {/* Total Badge */}
           <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-right">
             <span className="text-[10px] text-slate-400 font-bold uppercase block">Total Bank & Cash</span>
             <span className="text-lg font-black font-mono text-sky-400">
@@ -70,9 +129,10 @@ export const BankAccountsPillar = () => {
             </span>
           </div>
 
+          {/* Add Account Button */}
           <button
             onClick={() => setIsAdding(!isAdding)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>{isAdding ? 'Close' : '+ Add Account'}</span>
@@ -82,19 +142,19 @@ export const BankAccountsPillar = () => {
 
       {/* Inline Add Account Form */}
       {isAdding && (
-        <form onSubmit={handleAddSubmit} className="p-4 rounded-xl bg-slate-950 border border-indigo-500/30 grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <form onSubmit={handleAddSubmit} className="p-4 rounded-xl bg-slate-950 border border-sky-500/30 grid grid-cols-1 sm:grid-cols-4 gap-3 animate-fadeIn">
           <input
             type="text"
             required
             placeholder="Account / Bank Name (e.g. SBI Main Current)"
             value={newAccName}
             onChange={(e) => setNewAccName(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
           />
           <select
             value={newAccType}
             onChange={(e) => setNewAccType(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
           >
             <option value="BANK">Bank Account (बैंक)</option>
             <option value="CASH">Physical Cash Drawer (गल्ला कैश)</option>
@@ -104,11 +164,11 @@ export const BankAccountsPillar = () => {
             placeholder="Opening Balance (₹)"
             value={newAccOpening}
             onChange={(e) => setNewAccOpening(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500 font-mono"
           />
           <button
             type="submit"
-            className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg py-2 transition-colors"
+            className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg py-2 transition-colors"
           >
             Save Account
           </button>
@@ -119,26 +179,38 @@ export const BankAccountsPillar = () => {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/60">
-              <th className="py-3 px-3">Account Name & Type</th>
-              <th className="py-3 px-3 text-right">Morning Opening (₹)</th>
-              <th className="py-3 px-3 text-right">Deposits In (+)</th>
-              <th className="py-3 px-3 text-right">Withdrawals Out (-)</th>
-              <th className="py-3 px-3 text-right">Net Available Balance</th>
-              <th className="py-3 px-3 text-right">Actions</th>
-            </tr>
+            {entryMode === 'direct' ? (
+              <tr className="border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/60">
+                <th className="py-3 px-3">Account Name & Type</th>
+                <th className="py-3 px-3 text-right">🌅 कल का बैलेंस / सुबह का ओपनिंग (₹)</th>
+                <th className="py-3 px-3 text-right text-sky-400">🏦 आज का लाइव बैलेंस (Today's Balance ₹)</th>
+                <th className="py-3 px-3 text-right">🔄 आज का फर्क (Net Change)</th>
+                <th className="py-3 px-3 text-right">Action</th>
+              </tr>
+            ) : (
+              <tr className="border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/60">
+                <th className="py-3 px-3">Account Name & Type</th>
+                <th className="py-3 px-3 text-right">Morning Opening (₹)</th>
+                <th className="py-3 px-3 text-right text-emerald-400">Deposits In (+)</th>
+                <th className="py-3 px-3 text-right text-rose-400">Withdrawals Out (-)</th>
+                <th className="py-3 px-3 text-right text-sky-400">Net Available Balance</th>
+                <th className="py-3 px-3 text-right">Action</th>
+              </tr>
+            )}
           </thead>
-          <tbody className="divide-y divide-slate-800/60">
-            {activeBankAccounts.map((acc) => {
-              const isEditing = editingId === acc.id;
-              const closing = isEditing
-                ? Number(editValues.opening || 0) + Number(editValues.deposits || 0) - Number(editValues.withdrawals || 0)
-                : Number(acc.opening || 0) + Number(acc.deposits || 0) - Number(acc.withdrawals || 0);
 
+          <tbody className="divide-y divide-slate-800/60">
+            {activeBankAccounts.map((acc, index) => {
+              const opening = Number(acc.opening) || 0;
+              const deposits = Number(acc.deposits) || 0;
+              const withdrawals = Number(acc.withdrawals) || 0;
+              const closing = opening + deposits - withdrawals;
+              const diff = closing - opening;
               const isCash = acc.type === 'CASH';
 
               return (
                 <tr key={acc.id} className="hover:bg-slate-800/40 transition-colors">
+                  {/* Account Name & Type */}
                   <td className="py-3 px-3">
                     <div className="flex items-center gap-2">
                       <div className={`p-2 rounded-lg ${isCash ? 'bg-emerald-500/20 text-emerald-400' : 'bg-sky-500/20 text-sky-400'}`}>
@@ -151,89 +223,109 @@ export const BankAccountsPillar = () => {
                     </div>
                   </td>
 
-                  {/* Opening */}
-                  <td className="py-3 px-3 text-right">
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        value={editValues.opening}
-                        onChange={(e) => setEditValues({ ...editValues, opening: e.target.value })}
-                        className="w-28 bg-slate-950 border border-indigo-500 rounded px-2 py-1 text-right font-mono font-bold text-white focus:outline-none"
-                      />
-                    ) : (
-                      <span className="font-mono font-semibold text-slate-300">{formatINR(acc.opening)}</span>
-                    )}
-                  </td>
+                  {entryMode === 'direct' ? (
+                    <>
+                      {/* Morning Opening (Yesterday's Closing - Disabled / Read-Only) */}
+                      <td className="py-3 px-3 text-right">
+                        <div className="inline-flex items-center justify-end">
+                          <span
+                            className="font-mono font-semibold text-slate-400 bg-slate-950/80 border border-slate-800/80 px-3 py-1.5 rounded-lg text-xs cursor-not-allowed select-none"
+                            title="कल का क्लोजिंग बैलेंस (Locked & Auto-Loaded)"
+                          >
+                            🔒 {formatINR(acc.opening)}
+                          </span>
+                        </div>
+                      </td>
 
-                  {/* Deposits In */}
-                  <td className="py-3 px-3 text-right">
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        value={editValues.deposits}
-                        onChange={(e) => setEditValues({ ...editValues, deposits: e.target.value })}
-                        className="w-28 bg-slate-950 border border-emerald-500 rounded px-2 py-1 text-right font-mono font-bold text-emerald-400 focus:outline-none"
-                      />
-                    ) : (
-                      <span className="font-mono font-semibold text-emerald-400">
-                        {acc.deposits > 0 ? `+${formatINR(acc.deposits)}` : '₹0'}
-                      </span>
-                    )}
-                  </td>
+                      {/* Direct Today's Live Balance (Input with Enter Key Navigation) */}
+                      <td className="py-3 px-3 text-right">
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          <span className="text-sky-400 font-bold text-xs">₹</span>
+                          <input
+                            id={`bank-input-${index}`}
+                            type="number"
+                            value={closing === 0 ? '' : closing}
+                            placeholder="0"
+                            onFocus={(e) => e.target.select()}
+                            onKeyDown={(e) => handleKeyDown(e, index)}
+                            onChange={(e) => setBankAccountDirectTodayBalance(acc.id, e.target.value)}
+                            className="w-32 bg-sky-950/40 border border-sky-500/50 hover:border-sky-400 focus:border-sky-400 focus:bg-sky-950/80 rounded-lg px-2.5 py-1.5 text-right font-mono font-black text-sky-300 text-sm focus:outline-none transition-all shadow-inner ring-0 focus:ring-2 focus:ring-sky-500/50"
+                          />
+                        </div>
+                      </td>
 
-                  {/* Withdrawals Out */}
-                  <td className="py-3 px-3 text-right">
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        value={editValues.withdrawals}
-                        onChange={(e) => setEditValues({ ...editValues, withdrawals: e.target.value })}
-                        className="w-28 bg-slate-950 border border-rose-500 rounded px-2 py-1 text-right font-mono font-bold text-rose-400 focus:outline-none"
-                      />
-                    ) : (
-                      <span className="font-mono font-semibold text-rose-400">
-                        {acc.withdrawals > 0 ? `-${formatINR(acc.withdrawals)}` : '₹0'}
-                      </span>
-                    )}
-                  </td>
+                      {/* Net Difference Badge */}
+                      <td className="py-3 px-3 text-right">
+                        <span
+                          className={`inline-flex items-center gap-1 font-mono font-bold text-xs px-2 py-0.5 rounded-md ${
+                            diff > 0
+                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              : diff < 0
+                              ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                              : 'text-slate-500 bg-slate-800/40'
+                          }`}
+                        >
+                          {diff > 0 && <TrendingUp className="w-3 h-3 text-emerald-400" />}
+                          {diff < 0 && <TrendingDown className="w-3 h-3 text-rose-400" />}
+                          {diff > 0 ? `+${formatINR(diff)}` : diff < 0 ? `-${formatINR(Math.abs(diff))}` : 'बराबर (₹0)'}
+                        </span>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      {/* Detailed Mode - Opening */}
+                      <td className="py-3 px-3 text-right">
+                        <input
+                          type="number"
+                          value={acc.opening === 0 ? '' : acc.opening}
+                          placeholder="0"
+                          onChange={(e) => updateBankAccount(acc.id, { opening: Number(e.target.value) || 0 })}
+                          className="w-24 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right font-mono font-semibold text-slate-300 focus:outline-none focus:border-sky-500 text-xs"
+                        />
+                      </td>
 
-                  {/* Net Closing */}
-                  <td className="py-3 px-3 text-right">
-                    <span className="font-mono font-black text-sm text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-500/20">
-                      {formatINR(closing)}
-                    </span>
-                  </td>
+                      {/* Detailed Mode - Deposits In */}
+                      <td className="py-3 px-3 text-right">
+                        <input
+                          type="number"
+                          value={acc.deposits === 0 ? '' : acc.deposits}
+                          placeholder="0"
+                          onChange={(e) => updateBankAccount(acc.id, { deposits: Number(e.target.value) || 0 })}
+                          className="w-24 bg-slate-950 border border-emerald-500/40 focus:border-emerald-400 rounded px-2 py-1 text-right font-mono font-bold text-emerald-400 focus:outline-none text-xs"
+                        />
+                      </td>
+
+                      {/* Detailed Mode - Withdrawals Out */}
+                      <td className="py-3 px-3 text-right">
+                        <input
+                          type="number"
+                          value={acc.withdrawals === 0 ? '' : acc.withdrawals}
+                          placeholder="0"
+                          onChange={(e) => updateBankAccount(acc.id, { withdrawals: Number(e.target.value) || 0 })}
+                          className="w-24 bg-slate-950 border border-rose-500/40 focus:border-rose-400 rounded px-2 py-1 text-right font-mono font-bold text-rose-400 focus:outline-none text-xs"
+                        />
+                      </td>
+
+                      {/* Detailed Mode - Closing */}
+                      <td className="py-3 px-3 text-right">
+                        <span className="font-mono font-black text-sm text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-500/20">
+                          {formatINR(closing)}
+                        </span>
+                      </td>
+                    </>
+                  )}
 
                   {/* Actions */}
-                  <td className="py-3 px-3 text-right whitespace-nowrap">
-                    {isEditing ? (
-                      <button
-                        onClick={() => handleSaveEdit(acc.id)}
-                        className="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors"
-                        title="Save Changes"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                      </button>
-                    ) : (
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => handleStartEdit(acc)}
-                          className="p-1.5 text-slate-400 hover:text-indigo-300 hover:bg-slate-800 rounded-lg transition-colors"
-                          title="Quick Edit Balance"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm(`Delete ${acc.name}?`)) deleteBankAccount(acc.id);
-                          }}
-                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    )}
+                  <td className="py-3 px-3 text-right">
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Delete ${acc.name}?`)) deleteBankAccount(acc.id);
+                      }}
+                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                      title="Delete Account"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </td>
                 </tr>
               );

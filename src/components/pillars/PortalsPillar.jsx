@@ -8,13 +8,14 @@ import {
   Zap,
   ArrowDownLeft,
   ArrowUpRight,
+  ArrowRight,
   TrendingUp,
   TrendingDown,
   Layers,
   Sparkles
 } from 'lucide-react';
 
-export const PortalsPillar = () => {
+export const PortalsPillar = ({ onNext }) => {
   const {
     activePortals,
     totalPortalsBalance,
@@ -24,7 +25,9 @@ export const PortalsPillar = () => {
     deletePortal,
     carryForwardAllYesterday,
     selectedDate,
-    getPreviousDateString
+    getPreviousDateString,
+    showToast,
+    triggerLoader
   } = useHisab();
 
   const [isAdding, setIsAdding] = useState(false);
@@ -319,7 +322,7 @@ export const PortalsPillar = () => {
                       onClick={() => {
                         if (window.confirm(`Delete ${portal.name}?`)) deletePortal(portal.id);
                       }}
-                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                       title="Delete Portal"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -330,6 +333,47 @@ export const PortalsPillar = () => {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Bottom Save & Next Action Footer */}
+      <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <span className="w-2 h-2 rounded-full bg-amber-400" />
+          <span>कुल 10 पोर्टल बैलेंस:</span>
+          <span className="font-mono font-bold text-amber-300 text-sm">{formatINR(totalPortalsBalance)}</span>
+        </div>
+
+        <div className="flex items-center gap-2.5 justify-end">
+          <button
+            onClick={() => {
+              triggerLoader({
+                duration: 2200,
+                subtitle: '📱 10 पोर्टल बैलेंस सुरक्षित हो रहा है...',
+                onFinish: () => showToast('✅ सभी पोर्टल बैलेंस सुरक्षित हो गए!')
+              });
+            }}
+            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>💾 सेव करें (Save)</span>
+          </button>
+
+          <button
+            onClick={() => {
+              triggerLoader({
+                duration: 2400,
+                subtitle: '📱 पोर्टल बैलेंस सेव हुआ! 🏦 बैंक खाते लोड हो रहे हैं...',
+                onFinish: () => {
+                  showToast('✨ पोर्टल बैलेंस सेव हो गया! अगला: बैंक खाते व कैश');
+                  if (onNext) onNext();
+                }
+              });
+            }}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 cursor-pointer group"
+          >
+            <span>💾 सेव करें और अगला: बैंक खाते (Save & Next)</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </button>
+        </div>
       </div>
     </div>
   );

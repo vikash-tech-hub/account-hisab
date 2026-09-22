@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HisabProvider, useHisab } from './context/HisabContext';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
@@ -9,21 +9,51 @@ import { HisabSummaryOverview } from './components/dashboard/HisabSummaryOvervie
 import { PortalsPillar } from './components/pillars/PortalsPillar';
 import { BankAccountsPillar } from './components/pillars/BankAccountsPillar';
 import { PeopleMasterPillar } from './components/pillars/PeopleMasterPillar';
+import { IncomeTracker } from './components/incomes/IncomeTracker';
 import { ExpenseTracker } from './components/expenses/ExpenseTracker';
 import { JamaPillar } from './components/pillars/JamaPillar';
 import { LiyaPillar } from './components/pillars/LiyaPillar';
 import { ProfitChartSection } from './components/analytics/ProfitChartSection';
 import { PastHistoryView } from './components/history/PastHistoryView';
 import { QuickHisabParchi } from './components/pillars/QuickHisabParchi';
+import { ThagdaLoader } from './components/common/ThagdaLoader';
 
 const MainContent = () => {
-  const { toast } = useHisab();
-  const [activeTab, setActiveTab] = useState('all');
+  const { toast, loaderState, closeLoader } = useHisab();
+
+  // Default to Step 1 (Portals) or saved tab from localStorage
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('jsk_v4_active_tab') || 'portals';
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
+  useEffect(() => {
+    localStorage.setItem('jsk_v4_active_tab', activeTab);
+  }, [activeTab]);
+
+  const quickTabs = [
+    { id: 'portals', label: '1. 📱 10 पोर्टल (Portals)', color: 'bg-amber-600 text-white shadow-lg shadow-amber-600/30 ring-2 ring-amber-400/50' },
+    { id: 'accounts', label: '2. 🏦 बैंक व गल्ला (Bank/Cash)', color: 'bg-sky-600 text-white shadow-lg shadow-sky-600/30 ring-2 ring-sky-400/50' },
+    { id: 'people', label: '3. 👥 ग्राहक खाता (Jama/Liya)', color: 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400/50' },
+    { id: 'incomes', label: '4. 💰 अन्य कमाई (+Income)', color: 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 ring-2 ring-teal-400/50' },
+    { id: 'expenses', label: '5. ☕ दुकान खर्च (-Kharcha)', color: 'bg-pink-600 text-white shadow-lg shadow-pink-600/30 ring-2 ring-pink-400/50' },
+    { id: 'profit', label: '6. 📊 मुनाफ़ा रिपोर्ट (Profit)', color: 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 ring-2 ring-purple-400/50' },
+    { id: 'history', label: '7. 📜 इतिहास (Past Data)', color: 'bg-slate-700 text-white shadow-lg' },
+    { id: 'all', label: '🌟 All-in-1 (सब एक साथ)', color: 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' }
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative">
+      {/* 🚀 Stunning Animated Center Logo Loader (2.5 - 3 seconds) */}
+      {loaderState.isOpen && (
+        <ThagdaLoader
+          duration={loaderState.duration}
+          subtitle={loaderState.subtitle}
+          onFinish={closeLoader}
+        />
+      )}
+
       {/* Top Navbar */}
       <Navbar
         onOpenPrintModal={() => setIsPrintModalOpen(true)}
@@ -40,31 +70,79 @@ const MainContent = () => {
         />
 
         {/* Main Content Area - Full width */}
-        <main className="flex-1 lg:pl-64 p-4 sm:p-6 lg:p-8 w-full space-y-6 min-w-0">
+        <main className="flex-1 lg:pl-64 p-3 sm:p-5 lg:p-6 w-full space-y-5 min-w-0">
           
           {/* Interactive Date & History Switcher (Today, Yesterday, Custom Date) */}
           <DateNavigator />
 
-          {/* 4-Pillar Summary Cards & Net Capital Banner */}
+          {/* 6 Core Summary Cards & Net Capital Banner */}
           <HisabSummaryOverview
             activeSection={activeTab}
             setActiveSection={(tab) => setActiveTab(tab)}
           />
 
+          {/* 🌟 User-Friendly Interactive Section Switcher & Quick Actions Bar */}
+          <div className="sticky top-16 z-30 bg-slate-900/95 backdrop-blur-md p-2 rounded-2xl border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+            {/* Filter Tabs Scrollable */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+              {quickTabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? tab.color
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/80 bg-slate-950/60 border border-slate-800'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Quick Actions Right Pill */}
+            <div className="flex items-center gap-1.5 shrink-0 self-end md:self-auto">
+              <button
+                onClick={() => setIsPrintModalOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>🖨️ पर्ची प्रिंट</span>
+              </button>
+            </div>
+          </div>
+
           {/* Tab Views */}
           {activeTab === 'all' && (
             <div className="space-y-6 animate-fadeIn">
               {/* Pillar 1: Portals */}
-              <PortalsPillar />
+              <PortalsPillar onNext={() => setActiveTab('accounts')} />
 
               {/* Pillar 2: Bank Accounts & Cash */}
-              <BankAccountsPillar />
+              <BankAccountsPillar
+                onNext={() => setActiveTab('people')}
+                onPrev={() => setActiveTab('portals')}
+              />
 
               {/* Pillar 3 & 4: Unified People & Party Master (Jama & Liya) */}
-              <PeopleMasterPillar />
+              <PeopleMasterPillar
+                onNext={() => setActiveTab('incomes')}
+                onPrev={() => setActiveTab('accounts')}
+              />
+
+              {/* Other Income & Service Fees (AEPS, DMT, PF, Photo Copy, etc.) */}
+              <IncomeTracker
+                onNext={() => setActiveTab('expenses')}
+                onPrev={() => setActiveTab('people')}
+              />
 
               {/* Daily Shop Expenses Tracker */}
-              <ExpenseTracker />
+              <ExpenseTracker
+                onNext={() => setActiveTab('profit')}
+                onPrev={() => setActiveTab('incomes')}
+              />
 
               {/* Profit & Earnings Chart on Dashboard */}
               <ProfitChartSection />
@@ -73,25 +151,43 @@ const MainContent = () => {
 
           {activeTab === 'portals' && (
             <div className="animate-fadeIn">
-              <PortalsPillar />
+              <PortalsPillar onNext={() => setActiveTab('accounts')} />
             </div>
           )}
 
           {activeTab === 'accounts' && (
             <div className="animate-fadeIn">
-              <BankAccountsPillar />
+              <BankAccountsPillar
+                onNext={() => setActiveTab('people')}
+                onPrev={() => setActiveTab('portals')}
+              />
             </div>
           )}
 
           {(activeTab === 'people' || activeTab === 'jama' || activeTab === 'liya') && (
             <div className="animate-fadeIn">
-              <PeopleMasterPillar />
+              <PeopleMasterPillar
+                onNext={() => setActiveTab('incomes')}
+                onPrev={() => setActiveTab('accounts')}
+              />
+            </div>
+          )}
+
+          {activeTab === 'incomes' && (
+            <div className="animate-fadeIn">
+              <IncomeTracker
+                onNext={() => setActiveTab('expenses')}
+                onPrev={() => setActiveTab('people')}
+              />
             </div>
           )}
 
           {activeTab === 'expenses' && (
             <div className="animate-fadeIn">
-              <ExpenseTracker />
+              <ExpenseTracker
+                onNext={() => setActiveTab('profit')}
+                onPrev={() => setActiveTab('incomes')}
+              />
             </div>
           )}
 

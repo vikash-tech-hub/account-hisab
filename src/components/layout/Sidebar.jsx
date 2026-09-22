@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LayoutDashboard,
   CreditCard,
   Landmark,
   Users,
   Receipt,
+  Coins,
   ArrowDownLeft,
   ArrowUpRight,
   TrendingUp,
@@ -16,6 +17,7 @@ import {
   X
 } from 'lucide-react';
 import { useHisab } from '../../context/HisabContext';
+import { ResetModal } from '../common/ResetModal';
 
 export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
   const {
@@ -25,6 +27,8 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
     setSelectedBranchId,
     isAllShops
   } = useHisab();
+
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const navItems = [
     {
@@ -54,6 +58,13 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
       sublabel: 'Customer Ledger (Jama & Liya)',
       icon: Users,
       badge: 'Master'
+    },
+    {
+      id: 'incomes',
+      label: 'Other Income & Services',
+      sublabel: 'AEPS, DMT, PF, Photo Copy (कमाई)',
+      icon: Coins,
+      badge: '+₹ Kamai'
     },
     {
       id: 'expenses',
@@ -187,7 +198,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
           </nav>
         </div>
 
-        {/* Bottom utility: Reset sample data */}
+        {/* Bottom utility: Reset & Fresh Start */}
         <div className="pt-3 border-t border-slate-800/80 space-y-2 mt-4">
           <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
             <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11px]">
@@ -200,14 +211,20 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
           </div>
 
           <button
-            onClick={resetAllData}
-            className="w-full flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-medium border border-slate-800 transition-colors"
+            onClick={() => setIsResetModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 text-xs font-bold border border-rose-500/30 transition-all cursor-pointer shadow-sm"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Demo Data</span>
+            <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
+            <span>🔄 रीसेट व फ्रेश शुरुआत (Reset)</span>
           </button>
         </div>
       </aside>
+
+      {/* Reset Modal */}
+      <ResetModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+      />
     </>
   );
 };

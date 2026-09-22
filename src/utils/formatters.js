@@ -59,6 +59,56 @@ export const getTodayDateString = () => {
   return `${year}-${month}-${day}`;
 };
 
+export const getOffsetDateString = (offsetDays = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export const getPreviousDateString = (dateString) => {
+  if (!dateString) return getOffsetDateString(-1);
+  const parts = dateString.split('-');
+  if (parts.length === 3) {
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    d.setDate(d.getDate() - 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  return getOffsetDateString(-1);
+};
+
+export const getNextDateString = (dateString) => {
+  if (!dateString) return getOffsetDateString(1);
+  const parts = dateString.split('-');
+  if (parts.length === 3) {
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    d.setDate(d.getDate() + 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  return getOffsetDateString(1);
+};
+
+export const formatDateChip = (dateString) => {
+  if (!dateString) return '';
+  const parts = dateString.split('-');
+  if (parts.length === 3) {
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    return d.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short'
+    });
+  }
+  return dateString;
+};
+
 export const getRelativeTime = (timestamp) => {
   if (!timestamp) return '';
   const date = new Date(timestamp);

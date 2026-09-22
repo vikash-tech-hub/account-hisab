@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 
 export const ProfitChartSection = () => {
-  const { activeBranch, selectedDate, totalPortalsBalance, totalBankBalance } = useHisab();
+  const { activeBranch, selectedDate, totalPortalsBalance, totalBankBalance, totalIncomes, totalExpenses, todaysIncomes } = useHisab();
   const [viewTimeframe, setViewTimeframe] = useState('7DAYS'); // '7DAYS', 'MONTH'
 
   // Realistic Daily Commission & Net Profit Trend Data (Past 7 Days)
@@ -37,25 +37,23 @@ export const ProfitChartSection = () => {
     { date: '13 Sep', grossCommission: 1900, expenses: 350, netProfit: 1550, dmtVolume: 78000, aepsVolume: 48000 },
     { date: '14 Sep (परसों)', grossCommission: 2300, expenses: 400, netProfit: 1900, dmtVolume: 95000, aepsVolume: 58000 },
     { date: '15 Sep (कल)', grossCommission: 2650, expenses: 520, netProfit: 2130, dmtVolume: 125000, aepsVolume: 72000 },
-    { date: '16 Sep (आज)', grossCommission: 2950, expenses: 480, netProfit: 2470, dmtVolume: 145000, aepsVolume: 88000 }
+    { date: '16 Sep (आज)', grossCommission: totalIncomes || 2950, expenses: totalExpenses || 480, netProfit: (totalIncomes || 2950) - (totalExpenses || 480), dmtVolume: 145000, aepsVolume: 88000 }
   ];
 
-  // Portal-wise Commission Earnings Breakdown (Today)
+  // Service & Portal-wise Commission Earnings Breakdown (Today)
   const portalCommissionData = [
-    { name: 'Spice Money', commission: 720, count: 18, color: '#f97316' },
-    { name: 'Fino Bank', commission: 650, count: 14, color: '#b91c1c' },
-    { name: 'PayNearby', commission: 510, count: 12, color: '#0284c7' },
-    { name: 'DigiPay CSC', commission: 380, count: 9, color: '#4f46e5' },
-    { name: 'Airtel Bank', commission: 290, count: 7, color: '#dc2626' },
-    { name: 'Rapipay', commission: 190, count: 5, color: '#059669' },
-    { name: 'Relipay RNFI', commission: 120, count: 4, color: '#8b5cf6' },
-    { name: 'Bankit / EKO', commission: 90, count: 3, color: '#0891b2' }
+    { name: 'AEPS Cash Out', commission: todaysIncomes.filter(i => i.category === 'AEPS').reduce((s, i) => s + Number(i.amount || 0), 0) || 650, count: todaysIncomes.filter(i => i.category === 'AEPS').length || 14, color: '#10b981' },
+    { name: 'DMT Transfer Fee', commission: todaysIncomes.filter(i => i.category === 'DMT').reduce((s, i) => s + Number(i.amount || 0), 0) || 480, count: todaysIncomes.filter(i => i.category === 'DMT').length || 12, color: '#0284c7' },
+    { name: 'PF / EPFO Online', commission: todaysIncomes.filter(i => i.category === 'PF').reduce((s, i) => s + Number(i.amount || 0), 0) || 500, count: todaysIncomes.filter(i => i.category === 'PF').length || 5, color: '#f59e0b' },
+    { name: 'Photo Copy & Xerox', commission: todaysIncomes.filter(i => i.category === 'PHOTOCOPY').reduce((s, i) => s + Number(i.amount || 0), 0) || 320, count: todaysIncomes.filter(i => i.category === 'PHOTOCOPY').length || 8, color: '#a855f7' },
+    { name: 'PAN / Govt Services', commission: todaysIncomes.filter(i => i.category === 'PAN_PASSPORT').reduce((s, i) => s + Number(i.amount || 0), 0) || 300, count: todaysIncomes.filter(i => i.category === 'PAN_PASSPORT').length || 4, color: '#6366f1' },
+    { name: 'Bill Payment Charges', commission: todaysIncomes.filter(i => i.category === 'BILL_PAYMENT').reduce((s, i) => s + Number(i.amount || 0), 0) || 150, count: todaysIncomes.filter(i => i.category === 'BILL_PAYMENT').length || 5, color: '#eab308' }
   ];
 
   // Aggregate stats
-  const todayProfit = dailyProfitData[6].netProfit;
-  const todayGross = dailyProfitData[6].grossCommission;
-  const todayExpenses = dailyProfitData[6].expenses;
+  const todayGross = totalIncomes > 0 ? totalIncomes : dailyProfitData[6].grossCommission;
+  const todayExpenses = totalExpenses > 0 ? totalExpenses : dailyProfitData[6].expenses;
+  const todayProfit = todayGross - todayExpenses;
   const totalWeeklyProfit = dailyProfitData.reduce((sum, d) => sum + d.netProfit, 0);
   const avgDailyProfit = Math.round(totalWeeklyProfit / dailyProfitData.length);
 

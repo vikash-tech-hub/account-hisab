@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHisab } from '../../context/HisabContext';
-import { formatINR, formatDate, formatDateFull } from '../../utils/formatters';
+import { formatINR, formatDate, formatDateFull, getTodayDateString, getOffsetDateString } from '../../utils/formatters';
 import { History, Calendar, ArrowRight, Eye, Sparkles } from 'lucide-react';
 
 export const PastHistoryView = ({ onSelectDate }) => {
@@ -8,9 +8,9 @@ export const PastHistoryView = ({ onSelectDate }) => {
 
   // Preset summary calculations for known history dates
   const historySummaries = {
-    '2026-09-16': { portals: 124700, accounts: 184000, jama: 205000, liya: 75500, net: 438200 },
-    '2026-09-15': { portals: 133200, accounts: 175000, jama: 93000, liya: 57000, net: 382200 },
-    '2026-09-14': { portals: 134700, accounts: 153000, jama: 80000, liya: 15000, net: 352700 }
+    [getTodayDateString()]: { portals: 124700, accounts: 184000, jama: 205000, liya: 75500, net: 438200 },
+    [getOffsetDateString(-1)]: { portals: 133200, accounts: 175000, jama: 93000, liya: 57000, net: 382200 },
+    [getOffsetDateString(-2)]: { portals: 134700, accounts: 153000, jama: 80000, liya: 15000, net: 352700 }
   };
 
   return (

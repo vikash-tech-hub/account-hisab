@@ -22,10 +22,12 @@ import {
   Printer,
   ChevronRight,
   Filter,
-  Columns2
+  Columns2,
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react';
 
-export const PeopleMasterPillar = () => {
+export const PeopleMasterPillar = ({ onNext, onPrev }) => {
   const {
     customers,
     addCustomer,
@@ -41,7 +43,9 @@ export const PeopleMasterPillar = () => {
     deleteLiyaRecord,
     activeBankAccounts,
     activePortals,
-    selectedDate
+    selectedDate,
+    showToast,
+    triggerLoader
   } = useHisab();
 
   // Primary View Mode: 'khatabook' (Customer List + Split Ledger) or 'split_all' (Today's Side-by-Side Green/Red)
@@ -460,25 +464,34 @@ export const PeopleMasterPillar = () => {
                         activeCustomer.jamaList.map((j) => (
                           <div
                             key={j.id}
-                            className="p-2 rounded-lg bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs group"
+                            className="p-2.5 rounded-lg bg-slate-950/90 border border-emerald-950/40 hover:border-emerald-500/30 flex items-start justify-between gap-3 text-xs group transition-all"
                           >
-                            <div>
-                              <div className="font-bold text-slate-200">
-                                {j.portalOrAccount || 'Cash'}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-100">
+                                  {j.portalOrAccount || 'Cash in Hand'}
+                                </span>
                               </div>
-                              <div className="text-[10px] text-slate-400 font-mono">
-                                {j.date} • {j.time} {j.note ? `• ${j.note}` : ''}
+                              <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                <span>{j.date}</span>
+                                {j.time && <span className="text-slate-500">• {j.time}</span>}
+                                {j.note && (
+                                  <span className="text-emerald-300/80 bg-emerald-950/40 px-1.5 py-0.2 rounded border border-emerald-800/30">
+                                    {j.note}
+                                  </span>
+                                )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-black text-emerald-400">
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-mono font-black text-emerald-400 text-sm">
                                 +{formatINR(j.amount)}
                               </span>
                               <button
                                 onClick={() => deleteJamaRecord(j.id)}
+                                title="डिलीट करें"
                                 className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 rounded transition-all"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
@@ -513,25 +526,34 @@ export const PeopleMasterPillar = () => {
                         activeCustomer.liyaList.map((l) => (
                           <div
                             key={l.id}
-                            className="p-2 rounded-lg bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs group"
+                            className="p-2.5 rounded-lg bg-slate-950/90 border border-rose-950/40 hover:border-rose-500/30 flex items-start justify-between gap-3 text-xs group transition-all"
                           >
-                            <div>
-                              <div className="font-bold text-slate-200">
-                                {l.portalOrAccount || 'Cash'}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-100">
+                                  {l.portalOrAccount || 'Cash in Hand'}
+                                </span>
                               </div>
-                              <div className="text-[10px] text-slate-400 font-mono">
-                                {l.date} • {l.time} {l.note ? `• ${l.note}` : ''}
+                              <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                <span>{l.date}</span>
+                                {l.time && <span className="text-slate-500">• {l.time}</span>}
+                                {l.note && (
+                                  <span className="text-rose-300/80 bg-rose-950/40 px-1.5 py-0.2 rounded border border-rose-800/30">
+                                    {l.note}
+                                  </span>
+                                )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-black text-rose-400">
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-mono font-black text-rose-400 text-sm">
                                 -{formatINR(l.amount)}
                               </span>
                               <button
                                 onClick={() => deleteLiyaRecord(l.id)}
+                                title="डिलीट करें"
                                 className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 rounded transition-all"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
@@ -976,6 +998,65 @@ export const PeopleMasterPillar = () => {
           </div>
         </div>
       )}
+
+      {/* Bottom Save & Next Action Footer */}
+      <div className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {onPrev && (
+            <button
+              onClick={onPrev}
+              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>⬅️ पिछला: बैंक व गल्ला</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <div>
+              <span>कुल जमा:</span>{' '}
+              <span className="font-mono font-bold text-emerald-400">{formatINR(totalJamaAmount)}</span>
+            </div>
+            <span>•</span>
+            <div>
+              <span>कुल उधार:</span>{' '}
+              <span className="font-mono font-bold text-rose-400">{formatINR(totalLiyaAmount)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 justify-end">
+          <button
+            onClick={() => {
+              triggerLoader({
+                duration: 2200,
+                subtitle: '👥 ग्राहक खाता बही (Jama/Liya) सुरक्षित हो रही है...',
+                onFinish: () => showToast('✅ सभी ग्राहक खाता रिकॉर्ड सुरक्षित हो गए!')
+              });
+            }}
+            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>💾 सेव करें (Save)</span>
+          </button>
+
+          <button
+            onClick={() => {
+              triggerLoader({
+                duration: 2400,
+                subtitle: '👥 ग्राहक खाता सुरक्षित! 💰 अन्य सेवा कमाई लोड हो रही है...',
+                onFinish: () => {
+                  showToast('✨ ग्राहक खाता सुरक्षित! अगला: अन्य सेवा कमाई (Income)');
+                  if (onNext) onNext();
+                }
+              });
+            }}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer group"
+          >
+            <span>💾 सेव करें और अगला: अन्य कमाई (Save & Next)</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </button>
+        </div>
+      </div>
 
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useHisab } from '../../context/HisabContext';
 import { formatINR } from '../../utils/formatters';
 import { AddBranchModal } from '../branches/AddBranchModal';
+import { ResetModal } from '../common/ResetModal';
 import {
   Building2,
   Calendar,
@@ -11,7 +12,8 @@ import {
   Plus,
   Layers,
   Sparkles,
-  Store
+  Store,
+  RotateCcw
 } from 'lucide-react';
 
 export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
@@ -30,6 +32,7 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
 
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
   const [isAddBranchModalOpen, setIsAddBranchModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   return (
     <>
@@ -201,11 +204,23 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
               </div>
             </div>
 
-            {/* Right: Add Shop CTA + Date Picker & Print CTA */}
+            {/* Right: Reset Fresh Button + Add Shop CTA + Date Picker & Print CTA */}
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* 🔄 Reset & Fresh Start Button (Exact location of red box) */}
+              <button
+                onClick={() => setIsResetModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 hover:text-rose-200 text-xs font-bold transition-all shadow-sm cursor-pointer"
+                title="नया फ्रेश हिसाब शुरू करें या डेटा रीसेट करें"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
+                <span className="hidden sm:inline">🔄 रीसेट (Reset)</span>
+                <span className="sm:hidden">रीसेट</span>
+              </button>
+
               <button
                 onClick={() => setIsAddBranchModalOpen(true)}
-                className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-indigo-300 text-xs font-semibold hover:text-white transition-all"
+                className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-indigo-300 text-xs font-semibold hover:text-white transition-all cursor-pointer"
+                title="नई दुकान / नया खाता प्रोफाइल जोड़ें"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Add Shop</span>
@@ -223,7 +238,7 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
 
               <button
                 onClick={onOpenPrintModal}
-                className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all"
+                className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print Slip</span>
@@ -238,6 +253,12 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
       <AddBranchModal
         isOpen={isAddBranchModalOpen}
         onClose={() => setIsAddBranchModalOpen(false)}
+      />
+
+      {/* 🔄 Reset & Fresh Start Modal */}
+      <ResetModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
       />
     </>
   );

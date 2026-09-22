@@ -7,13 +7,15 @@ import {
   Trash2,
   Zap,
   Wallet,
+  ArrowRight,
+  ArrowLeft,
   TrendingUp,
   TrendingDown,
   Layers,
   Sparkles
 } from 'lucide-react';
 
-export const BankAccountsPillar = () => {
+export const BankAccountsPillar = ({ onNext, onPrev }) => {
   const {
     activeBankAccounts,
     totalBankBalance,
@@ -23,7 +25,9 @@ export const BankAccountsPillar = () => {
     deleteBankAccount,
     carryForwardAllYesterday,
     selectedDate,
-    getPreviousDateString
+    getPreviousDateString,
+    showToast,
+    triggerLoader
   } = useHisab();
 
   const [isAdding, setIsAdding] = useState(false);
@@ -321,7 +325,7 @@ export const BankAccountsPillar = () => {
                       onClick={() => {
                         if (window.confirm(`Delete ${acc.name}?`)) deleteBankAccount(acc.id);
                       }}
-                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                       title="Delete Account"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -332,6 +336,59 @@ export const BankAccountsPillar = () => {
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Bottom Save & Next Action Footer */}
+      <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {onPrev && (
+            <button
+              onClick={onPrev}
+              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>⬅️ पिछला: 10 पोर्टल</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-sky-400" />
+            <span>कुल बैंक व गल्ला:</span>
+            <span className="font-mono font-bold text-sky-300 text-sm">{formatINR(totalBankBalance)}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 justify-end">
+          <button
+            onClick={() => {
+              triggerLoader({
+                duration: 2200,
+                subtitle: '🏦 बैंक खाते व गल्ला कैश सुरक्षित हो रहा है...',
+                onFinish: () => showToast('✅ सभी बैंक खाते व गल्ला कैश सुरक्षित हो गए!')
+              });
+            }}
+            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>💾 सेव करें (Save)</span>
+          </button>
+
+          <button
+            onClick={() => {
+              triggerLoader({
+                duration: 2400,
+                subtitle: '🏦 बैंक व गल्ला सुरक्षित हुआ! 👥 ग्राहक खाता बही लोड हो रही है...',
+                onFinish: () => {
+                  showToast('✨ बैंक व गल्ला कैश सेव हो गया! अगला: ग्राहक खाता (जमा/उधार)');
+                  if (onNext) onNext();
+                }
+              });
+            }}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-slate-950 font-black text-xs shadow-lg shadow-sky-500/20 transition-all flex items-center gap-2 cursor-pointer group"
+          >
+            <span>💾 सेव करें और अगला: ग्राहक खाता (Save & Next)</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </button>
+        </div>
       </div>
     </div>
   );

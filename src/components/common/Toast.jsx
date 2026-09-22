@@ -9,14 +9,14 @@ export const Toast = ({ toast, onClose }) => {
   const isInfo = toast.type === 'info';
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 max-w-md animate-bounce-short">
+    <div className="fixed top-20 right-6 z-50 max-w-md animate-bounce-short">
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md border ${
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md border ${
           isSuccess
-            ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-100'
+            ? 'bg-emerald-950/95 border-emerald-500/50 text-emerald-100 shadow-emerald-500/20'
             : isError
-            ? 'bg-rose-950/90 border-rose-500/40 text-rose-100'
-            : 'bg-indigo-950/90 border-indigo-500/40 text-indigo-100'
+            ? 'bg-rose-950/95 border-rose-500/50 text-rose-100 shadow-rose-500/20'
+            : 'bg-indigo-950/95 border-indigo-500/50 text-indigo-100 shadow-indigo-500/20'
         }`}
       >
         {isSuccess && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />}

@@ -16,24 +16,28 @@ export const QuickHisabParchi = ({ isOpen, onClose }) => {
     totalBankBalance,
     totalJamaAmount,
     totalLiyaAmount,
+    totalIncomes,
+    totalExpenses,
     netTotalCapital
   } = useHisab();
 
   if (!isOpen) return null;
+
+  const netTodayProfit = totalIncomes - totalExpenses;
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Daily 4-Pillar Hisab Statement Slip"
-      subtitle="Complete summary of Portals, Bank Accounts, Jama and Liya"
+      subtitle="Complete summary of Portals, Bank Accounts, Jama, Liya, Income and Expenses"
       maxWidth="max-w-2xl"
     >
       <div className="space-y-4">
         <div className="flex justify-end no-print">
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>Print Slip</span>
@@ -68,6 +72,22 @@ export const QuickHisabParchi = ({ isOpen, onClose }) => {
             <div className="p-2.5 rounded-lg border border-slate-300 bg-slate-50">
               <div className="font-bold text-slate-600 uppercase text-[10px]">4. Total People Took (Liya/Due)</div>
               <div className="text-base font-mono font-black text-rose-800 mt-0.5">-{formatINR(totalLiyaAmount)}</div>
+            </div>
+          </div>
+
+          {/* Income & Expenses Row */}
+          <div className="grid grid-cols-3 gap-2.5 pt-1">
+            <div className="p-2 rounded-lg border border-emerald-200 bg-emerald-50/60">
+              <div className="font-bold text-emerald-800 uppercase text-[9px]">Total Income (AEPS/DMT/PF/Xerox)</div>
+              <div className="text-sm font-mono font-black text-emerald-700 mt-0.5">+{formatINR(totalIncomes)}</div>
+            </div>
+            <div className="p-2 rounded-lg border border-rose-200 bg-rose-50/60">
+              <div className="font-bold text-rose-800 uppercase text-[9px]">Shop Expenses (दुकान खर्च)</div>
+              <div className="text-sm font-mono font-black text-rose-700 mt-0.5">-{formatINR(totalExpenses)}</div>
+            </div>
+            <div className="p-2 rounded-lg border border-indigo-200 bg-indigo-50/60">
+              <div className="font-bold text-indigo-800 uppercase text-[9px]">Net Daily Profit (शुद्ध लाभ)</div>
+              <div className="text-sm font-mono font-black text-indigo-900 mt-0.5">{formatINR(netTodayProfit)}</div>
             </div>
           </div>
 

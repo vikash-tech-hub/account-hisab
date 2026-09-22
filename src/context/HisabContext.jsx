@@ -6,9 +6,10 @@ import {
   INITIAL_DAILY_ACCOUNTS,
   INITIAL_JAMA_RECORDS,
   INITIAL_LIYA_RECORDS,
-  INITIAL_EXPENSES
+  INITIAL_EXPENSES,
+  INITIAL_INCOMES
 } from '../data/initialData';
-import { getTodayDateString } from '../utils/formatters';
+import { getTodayDateString, getOffsetDateString, getPreviousDateString } from '../utils/formatters';
 
 const HisabContext = createContext(null);
 
@@ -20,6 +21,7 @@ const STORAGE_KEYS = {
   JAMA: 'jsk_v4_jama',
   LIYA: 'jsk_v4_liya',
   EXPENSES: 'jsk_v4_expenses',
+  INCOMES: 'jsk_v4_incomes',
   SELECTED_BRANCH: 'jsk_v4_selected_branch',
   SELECTED_DATE: 'jsk_v4_selected_date'
 };
@@ -42,7 +44,11 @@ export const HisabProvider = ({ children }) => {
 
   const [selectedDate, setSelectedDate] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SELECTED_DATE);
-    return saved || '2026-09-16';
+    // If the saved date was the legacy hardcoded date (2026-09-16), reset to current today
+    if (saved && saved !== '2026-09-16') {
+      return saved;
+    }
+    return getTodayDateString();
   });
 
   const [dailyPortals, setDailyPortals] = useState(() => {
@@ -70,7 +76,37 @@ export const HisabProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : INITIAL_EXPENSES;
   });
 
+  const [incomes, setIncomes] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.INCOMES);
+    return saved ? JSON.parse(saved) : INITIAL_INCOMES;
+  });
+
   const [toast, setToast] = useState(null);
+  const [loaderState, setLoaderState] = useState({
+    isOpen: true,
+    duration: 2600,
+    subtitle: '4-Pillars Daily Hisab लोड हो रहा है...'
+  });
+
+  const triggerLoader = ({ duration = 2400, subtitle = 'डेटा सुरक्षित हो रहा है...', onFinish } = {}) => {
+    setLoaderState({
+      isOpen: true,
+      duration,
+      subtitle,
+      onFinish
+    });
+  };
+
+  const closeLoader = () => {
+    if (loaderState.onFinish) {
+      try {
+        loaderState.onFinish();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    setLoaderState(prev => ({ ...prev, isOpen: false, onFinish: null }));
+  };
 
   // Sync to LocalStorage
   useEffect(() => {
@@ -100,6 +136,10 @@ export const HisabProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.EXPENSES, JSON.stringify(expenses));
   }, [expenses]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.INCOMES, JSON.stringify(incomes));
+  }, [incomes]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SELECTED_BRANCH, selectedBranchId);
@@ -176,7 +216,8 @@ export const HisabProvider = ({ children }) => {
       });
     }
 
-    const fallbackTemplate = dailyPortals[`${selectedBranchId}_2026-09-16`] || INITIAL_DAILY_PORTALS['branch-1_2026-09-16'];
+    const todayKeyStr = getTodayDateString();
+    const fallbackTemplate = dailyPortals[`${selectedBranchId}_${todayKeyStr}`] || INITIAL_DAILY_PORTALS[`branch-1_${todayKeyStr}`] || Object.values(INITIAL_DAILY_PORTALS)[0];
     return (fallbackTemplate || []).map(p => ({
       ...p,
       opening: p.opening || 10000,
@@ -191,7 +232,7 @@ export const HisabProvider = ({ children }) => {
       const combined = [];
       branches.forEach(b => {
         const key = `${b.id}_${selectedDate}`;
-        const bAccs = dailyAccounts[key] || dailyAccounts[`${b.id}_2026-09-16`] || [];
+        const bAccs = dailyAccounts[key] || dailyAccounts[`${b.id}_${getTodayDateString()}`] || Object.values(dailyAccounts)[0] || [];
         bAccs.forEach(a => {
           combined.push({
             ...a,
@@ -224,7 +265,8 @@ export const HisabProvider = ({ children }) => {
       });
     }
 
-    const fallbackTemplate = dailyAccounts[`${selectedBranchId}_2026-09-16`] || INITIAL_DAILY_ACCOUNTS['branch-1_2026-09-16'];
+    const todayKeyStr = getTodayDateString();
+    const fallbackTemplate = dailyAccounts[`${selectedBranchId}_${todayKeyStr}`] || INITIAL_DAILY_ACCOUNTS[`branch-1_${todayKeyStr}`] || Object.values(INITIAL_DAILY_ACCOUNTS)[0];
     return (fallbackTemplate || []).map(a => ({
       ...a,
       opening: a.opening || 20000,
@@ -257,9 +299,17 @@ export const HisabProvider = ({ children }) => {
     return expenses.filter(e => e.branchId === selectedBranchId && e.date === selectedDate);
   }, [expenses, selectedBranchId, selectedDate, isAllShops]);
 
+  // Active Incomes & Service Fees for selectedDate (AEPS, DMT, PF, Photo Copy, etc.)
+  const todaysIncomes = useMemo(() => {
+    if (isAllShops) {
+      return incomes.filter(i => i.date === selectedDate);
+    }
+    return incomes.filter(i => i.branchId === selectedBranchId && i.date === selectedDate);
+  }, [incomes, selectedBranchId, selectedDate, isAllShops]);
+
   // Available History Dates
   const availableHistoryDates = useMemo(() => {
-    const datesSet = new Set(['2026-09-16', '2026-09-15', '2026-09-14']);
+    const datesSet = new Set([getTodayDateString(), getOffsetDateString(-1), getOffsetDateString(-2)]);
     Object.keys(dailyPortals).forEach(k => {
       const parts = k.split('_');
       if (parts[1]) datesSet.add(parts[1]);
@@ -273,8 +323,11 @@ export const HisabProvider = ({ children }) => {
     expenses.forEach(e => {
       if (e.date) datesSet.add(e.date);
     });
+    incomes.forEach(i => {
+      if (i.date) datesSet.add(i.date);
+    });
     return Array.from(datesSet).sort().reverse();
-  }, [dailyPortals, jamaRecords, liyaRecords, expenses]);
+  }, [dailyPortals, jamaRecords, liyaRecords, expenses, incomes]);
 
   // 1. Total All Portals Closing Balance
   const totalPortalsBalance = useMemo(() => {
@@ -307,17 +360,24 @@ export const HisabProvider = ({ children }) => {
     return todaysExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   }, [todaysExpenses]);
 
+  // 6. Total Other Incomes & Service Fees (AEPS, DMT, PF, Photo Copy, etc.)
+  const totalIncomes = useMemo(() => {
+    return todaysIncomes.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+  }, [todaysIncomes]);
+
   // Daily Summary Object
   const dailySummary = useMemo(() => {
     return {
       totalExpenses,
+      totalIncomes,
+      netDailyProfit: totalIncomes - totalExpenses,
       totalPortalsBalance,
       totalBankBalance,
       totalJamaAmount,
       totalLiyaAmount,
       netTotalCapital: totalPortalsBalance + totalBankBalance + totalLiyaAmount - totalJamaAmount
     };
-  }, [totalExpenses, totalPortalsBalance, totalBankBalance, totalJamaAmount, totalLiyaAmount]);
+  }, [totalExpenses, totalIncomes, totalPortalsBalance, totalBankBalance, totalJamaAmount, totalLiyaAmount]);
 
   // Net Total Hisab / Available Capital
   const netTotalCapital = useMemo(() => {
@@ -756,19 +816,100 @@ export const HisabProvider = ({ children }) => {
     showToast('Expense removed', 'info');
   };
 
+  // Add Income & Service Fee (AEPS, DMT, PF, Photo Copy, etc.)
+  const addIncome = (data) => {
+    const targetBranch = isAllShops ? (branches[0]?.id || 'branch-1') : selectedBranchId;
+    const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const newInc = {
+      id: `inc-${Date.now()}`,
+      branchId: targetBranch,
+      date: selectedDate,
+      time,
+      title: data.title,
+      amount: Number(data.amount || 0),
+      category: data.category || 'OTHER',
+      paymentMode: data.paymentMode || 'Cash in Hand',
+      customerName: data.customerName || '',
+      remark: data.remark || ''
+    };
+    setIncomes(prev => [newInc, ...prev]);
+    showToast(`Income added: ₹${data.amount} for ${data.title}`);
+  };
+
+  const deleteIncome = (id) => {
+    setIncomes(prev => prev.filter(i => i.id !== id));
+    showToast('Income entry removed', 'info');
+  };
+
+  const updateIncome = (id, updates) => {
+    setIncomes(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
+    showToast('Income entry updated');
+  };
+
+  // 100% Clean Fresh Start with ₹0 balances & empty transactions
+  const clearAllDataToFresh = () => {
+    const today = getTodayDateString();
+    
+    // Clean Portals with ₹0 opening balance
+    const cleanPortals = [
+      { id: 'p1', name: 'Spice Money', code: 'SM-101', opening: 0, inAmount: 0, outAmount: 0, color: '#f97316' },
+      { id: 'p2', name: 'PayNearby', code: 'PN-102', opening: 0, inAmount: 0, outAmount: 0, color: '#0284c7' },
+      { id: 'p3', name: 'CSC DigiPay', code: 'CSC-103', opening: 0, inAmount: 0, outAmount: 0, color: '#4f46e5' },
+      { id: 'p4', name: 'Fino Payments Bank', code: 'FINO-104', opening: 0, inAmount: 0, outAmount: 0, color: '#b91c1c' },
+      { id: 'p5', name: 'Airtel Payments Bank', code: 'APB-105', opening: 0, inAmount: 0, outAmount: 0, color: '#dc2626' },
+      { id: 'p6', name: 'Rapipay', code: 'RAPI-106', opening: 0, inAmount: 0, outAmount: 0, color: '#059669' },
+      { id: 'p7', name: 'RNFI Relipay', code: 'RNFI-107', opening: 0, inAmount: 0, outAmount: 0, color: '#8b5cf6' },
+      { id: 'p8', name: 'Bankit', code: 'BKT-108', opening: 0, inAmount: 0, outAmount: 0, color: '#0891b2' },
+      { id: 'p9', name: 'Payworld', code: 'PW-109', opening: 0, inAmount: 0, outAmount: 0, color: '#d97706' },
+      { id: 'p10', name: 'EKO Financial', code: 'EKO-110', opening: 0, inAmount: 0, outAmount: 0, color: '#0d9488' }
+    ];
+
+    // Clean Bank Accounts with ₹0 opening balance
+    const cleanAccounts = [
+      { id: 'acc-1', name: 'Cash in Hand (गल्ला कैश)', type: 'CASH', opening: 0, deposits: 0, withdrawals: 0, color: '#10b981' },
+      { id: 'acc-2', name: 'Primary Current A/C', type: 'BANK', opening: 0, deposits: 0, withdrawals: 0, color: '#0284c7' },
+      { id: 'acc-3', name: 'CSP Settlement A/C', type: 'BANK', opening: 0, deposits: 0, withdrawals: 0, color: '#4f46e5' },
+      { id: 'acc-4', name: 'Savings A/C', type: 'BANK', opening: 0, deposits: 0, withdrawals: 0, color: '#dc2626' }
+    ];
+
+    const targetBranch = branches[0]?.id || 'branch-1';
+    const cleanPortalsMap = { [`${targetBranch}_${today}`]: cleanPortals };
+    const cleanAccountsMap = { [`${targetBranch}_${today}`]: cleanAccounts };
+
+    localStorage.removeItem(STORAGE_KEYS.JAMA);
+    localStorage.removeItem(STORAGE_KEYS.LIYA);
+    localStorage.removeItem(STORAGE_KEYS.EXPENSES);
+    localStorage.removeItem(STORAGE_KEYS.INCOMES);
+    localStorage.removeItem(STORAGE_KEYS.CUSTOMERS);
+
+    setSelectedDate(today);
+    setDailyPortals(cleanPortalsMap);
+    setDailyAccounts(cleanAccountsMap);
+    setJamaRecords([]);
+    setLiyaRecords([]);
+    setExpenses([]);
+    setIncomes([]);
+    setCustomers([]);
+  };
+
+  // Reset to sample filled demo data
+  const resetToDemoData = () => {
+    const today = getTodayDateString();
+    setSelectedDate(today);
+    setBranches(INITIAL_BRANCHES);
+    setSelectedBranchId('branch-1');
+    setCustomers(INITIAL_CUSTOMERS);
+    setDailyPortals(INITIAL_DAILY_PORTALS);
+    setDailyAccounts(INITIAL_DAILY_ACCOUNTS);
+    setJamaRecords(INITIAL_JAMA_RECORDS);
+    setLiyaRecords(INITIAL_LIYA_RECORDS);
+    setExpenses(INITIAL_EXPENSES);
+    setIncomes(INITIAL_INCOMES);
+  };
+
   const resetAllData = () => {
-    if (window.confirm('Reset all multi-shop hisab records back to default demo data?')) {
-      localStorage.clear();
-      setBranches(INITIAL_BRANCHES);
-      setSelectedBranchId('branch-1');
-      setSelectedDate('2026-09-16');
-      setDailyPortals(INITIAL_DAILY_PORTALS);
-      setDailyAccounts(INITIAL_DAILY_ACCOUNTS);
-      setJamaRecords(INITIAL_JAMA_RECORDS);
-      setLiyaRecords(INITIAL_LIYA_RECORDS);
-      setExpenses(INITIAL_EXPENSES);
-      showToast('All Hisab data reset to default demo');
-    }
+    resetToDemoData();
+    showToast('All Hisab data reset to default demo');
   };
 
   return (
@@ -796,6 +937,9 @@ export const HisabProvider = ({ children }) => {
         expenses,
         todaysExpenses,
         totalExpenses,
+        incomes,
+        todaysIncomes,
+        totalIncomes,
         dailySummary,
         totalPortalsBalance,
         totalBankBalance,
@@ -820,6 +964,14 @@ export const HisabProvider = ({ children }) => {
         deleteLiyaRecord,
         addExpense,
         deleteExpense,
+        addIncome,
+        deleteIncome,
+        updateIncome,
+        loaderState,
+        triggerLoader,
+        closeLoader,
+        clearAllDataToFresh,
+        resetToDemoData,
         resetAllData
       }}
     >

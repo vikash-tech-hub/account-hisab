@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHisab } from '../../context/HisabContext';
-import { formatDate, formatDateFull } from '../../utils/formatters';
+import { formatDate, formatDateFull, formatDateChip, getTodayDateString, getOffsetDateString } from '../../utils/formatters';
 import {
   Calendar,
   ChevronLeft,
@@ -20,9 +20,13 @@ export const DateNavigator = () => {
     carryForwardAllYesterday
   } = useHisab();
 
-  const isToday = selectedDate === '2026-09-16';
-  const isYesterday = selectedDate === '2026-09-15';
-  const isDayBefore = selectedDate === '2026-09-14';
+  const todayStr = getTodayDateString();
+  const yesterdayStr = getOffsetDateString(-1);
+  const dayBeforeStr = getOffsetDateString(-2);
+
+  const isToday = selectedDate === todayStr;
+  const isYesterday = selectedDate === yesterdayStr;
+  const isDayBefore = selectedDate === dayBeforeStr;
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -73,34 +77,34 @@ export const DateNavigator = () => {
         {/* Quick Date Chips */}
         <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
           <button
-            onClick={() => setSelectedDate('2026-09-16')}
+            onClick={() => setSelectedDate(todayStr)}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               isToday
                 ? 'bg-indigo-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            Today (16 Sep)
+            Today ({formatDateChip(todayStr)})
           </button>
           <button
-            onClick={() => setSelectedDate('2026-09-15')}
+            onClick={() => setSelectedDate(yesterdayStr)}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               isYesterday
                 ? 'bg-indigo-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            Yesterday (15 Sep)
+            Yesterday ({formatDateChip(yesterdayStr)})
           </button>
           <button
-            onClick={() => setSelectedDate('2026-09-14')}
+            onClick={() => setSelectedDate(dayBeforeStr)}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               isDayBefore
                 ? 'bg-indigo-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            14 Sep
+            {formatDateChip(dayBeforeStr)}
           </button>
         </div>
 

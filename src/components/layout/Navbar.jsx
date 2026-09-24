@@ -52,12 +52,12 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
 
               {/* Logo */}
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 font-black text-lg">
-                  4H
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 font-black text-sm tracking-tighter">
+                  MVE
                 </div>
                 <div className="hidden sm:block">
                   <div className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5">
-                    Jan Seva Kendra Hisab
+                    Maa Vaishno Enterprises
                     <span className="text-[10px] uppercase tracking-wider bg-emerald-500/20 text-emerald-300 font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">
                       4-Pillars
                     </span>

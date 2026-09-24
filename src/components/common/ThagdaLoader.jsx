@@ -5,7 +5,7 @@ import { useHisab } from '../../context/HisabContext';
 export const ThagdaLoader = ({
   onFinish,
   duration = 2400,
-  title = 'Jan Seva Kendra Hisab',
+  title = 'Maa Vaishno Enterprises',
   subtitle
 }) => {
   const { theme } = useHisab();
@@ -32,7 +32,7 @@ export const ThagdaLoader = ({
         } else if (pct < 85) {
           setStatusText('👥 ग्राहक खाता बही (Jama/Liya) सिंक हो रही है...');
         } else {
-          setStatusText('✨ जन सेवा केंद्र हिसाब पोर्टल तैयार है!');
+          setStatusText('✨ माँ वैष्णो इंटरप्राइजेज हिसाब पोर्टल तैयार है!');
         }
       }
 
@@ -84,11 +84,11 @@ export const ThagdaLoader = ({
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
             
             {/* Center Logo Typography */}
-            <div className="text-2xl sm:text-3xl font-black font-mono tracking-wider bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 bg-clip-text text-transparent drop-shadow-md">
-              4H
+            <div className="text-xl sm:text-2xl font-black font-mono tracking-wider bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 bg-clip-text text-transparent drop-shadow-md">
+              MVE
             </div>
-            <div className="text-[8px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mt-0.5 font-sans">
-              HISAB
+            <div className="text-[7.5px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mt-0.5 font-sans">
+              ENTERPRISES
             </div>
           </div>
         </div>
@@ -98,10 +98,10 @@ export const ThagdaLoader = ({
       <div className="mt-8 text-center space-y-1.5 relative z-10 px-4">
         <div className="flex items-center justify-center gap-2">
           <span className="text-base sm:text-lg font-black tracking-wide uppercase text-slate-900 dark:text-white">
-            Jan Seva Kendra Hisab
+            Maa Vaishno Enterprises
           </span>
           <span className="bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/30">
-            4-Pillars
+            4-Pillars Hisab
           </span>
         </div>
         <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">

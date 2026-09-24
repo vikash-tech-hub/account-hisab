@@ -24,6 +24,7 @@ const STORAGE_KEYS = {
   INCOMES: 'jsk_v4_incomes',
   SELECTED_BRANCH: 'jsk_v4_selected_branch',
   SELECTED_DATE: 'jsk_v4_selected_date',
+  SUMMARY_VIEW_MODE: 'jsk_v4_summary_view_mode',
   THEME: 'jsk_v4_theme'
 };
 
@@ -107,6 +108,11 @@ export const HisabProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : INITIAL_INCOMES;
   });
 
+  const [summaryViewMode, setSummaryViewMode] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.SUMMARY_VIEW_MODE);
+    return saved || 'daily';
+  });
+
   const [toast, setToast] = useState(null);
   const [loaderState, setLoaderState] = useState({
     isOpen: true,
@@ -174,6 +180,10 @@ export const HisabProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SELECTED_DATE, selectedDate);
   }, [selectedDate]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SUMMARY_VIEW_MODE, summaryViewMode);
+  }, [summaryViewMode]);
 
   const isAllShops = selectedBranchId === 'ALL_SHOPS';
 
@@ -373,25 +383,55 @@ export const HisabProvider = ({ children }) => {
     }, 0);
   }, [activeBankAccounts]);
 
-  // 3. Total People Jama
+  // 3. Total People Jama (Selected Date)
   const totalJamaAmount = useMemo(() => {
     return activeJamaList.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
   }, [activeJamaList]);
 
-  // 4. Total People Liya
+  // 4. Total People Liya (Selected Date)
   const totalLiyaAmount = useMemo(() => {
     return activeLiyaList.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
   }, [activeLiyaList]);
 
-  // 5. Total Expenses
+  // All-time Cumulative Jama (All dates)
+  const allTimeJamaList = useMemo(() => {
+    return isAllShops ? jamaRecords : jamaRecords.filter(r => r.branchId === selectedBranchId);
+  }, [jamaRecords, selectedBranchId, isAllShops]);
+
+  const allTimeJamaAmount = useMemo(() => {
+    return allTimeJamaList.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+  }, [allTimeJamaList]);
+
+  // All-time Cumulative Liya (All dates)
+  const allTimeLiyaList = useMemo(() => {
+    return isAllShops ? liyaRecords : liyaRecords.filter(r => r.branchId === selectedBranchId);
+  }, [liyaRecords, selectedBranchId, isAllShops]);
+
+  const allTimeLiyaAmount = useMemo(() => {
+    return allTimeLiyaList.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+  }, [allTimeLiyaList]);
+
+  // 5. Total Expenses (Selected Date)
   const totalExpenses = useMemo(() => {
     return todaysExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   }, [todaysExpenses]);
 
-  // 6. Total Other Incomes & Service Fees (AEPS, DMT, PF, Photo Copy, etc.)
+  // All-time Cumulative Expenses
+  const allTimeExpenses = useMemo(() => {
+    const list = isAllShops ? expenses : expenses.filter(e => e.branchId === selectedBranchId);
+    return list.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  }, [expenses, selectedBranchId, isAllShops]);
+
+  // 6. Total Other Incomes & Service Fees (Selected Date)
   const totalIncomes = useMemo(() => {
     return todaysIncomes.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
   }, [todaysIncomes]);
+
+  // All-time Cumulative Incomes
+  const allTimeIncomes = useMemo(() => {
+    const list = isAllShops ? incomes : incomes.filter(i => i.branchId === selectedBranchId);
+    return list.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+  }, [incomes, selectedBranchId, isAllShops]);
 
   // Daily Summary Object
   const dailySummary = useMemo(() => {
@@ -407,10 +447,14 @@ export const HisabProvider = ({ children }) => {
     };
   }, [totalExpenses, totalIncomes, totalPortalsBalance, totalBankBalance, totalJamaAmount, totalLiyaAmount]);
 
-  // Net Total Hisab / Available Capital
+  // Net Total Hisab / Available Capital (Daily vs Cumulative)
   const netTotalCapital = useMemo(() => {
     return totalPortalsBalance + totalBankBalance + totalLiyaAmount - totalJamaAmount;
   }, [totalPortalsBalance, totalBankBalance, totalLiyaAmount, totalJamaAmount]);
+
+  const allTimeNetTotalCapital = useMemo(() => {
+    return totalPortalsBalance + totalBankBalance + allTimeLiyaAmount - allTimeJamaAmount;
+  }, [totalPortalsBalance, totalBankBalance, allTimeLiyaAmount, allTimeJamaAmount]);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
@@ -999,18 +1043,27 @@ export const HisabProvider = ({ children }) => {
         customerLedgers,
         activeJamaList,
         activeLiyaList,
+        allTimeJamaList,
+        allTimeLiyaList,
         expenses,
         todaysExpenses,
         totalExpenses,
+        allTimeExpenses,
         incomes,
         todaysIncomes,
         totalIncomes,
+        allTimeIncomes,
         dailySummary,
         totalPortalsBalance,
         totalBankBalance,
         totalJamaAmount,
         totalLiyaAmount,
+        allTimeJamaAmount,
+        allTimeLiyaAmount,
+        summaryViewMode,
+        setSummaryViewMode,
         netTotalCapital,
+        allTimeNetTotalCapital,
         toast,
         showToast,
         carryForwardAllYesterday,

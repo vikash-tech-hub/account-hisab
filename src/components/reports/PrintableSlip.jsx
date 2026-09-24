@@ -21,10 +21,10 @@ export const PrintableSlip = ({ isOpen, onClose }) => {
   };
 
   const waUrl = generateDailyHisabWhatsAppUrl(
-    'Jan Seva Kendra Hisab',
+    activeBranch?.name || 'Maa Vaishno Enterprises',
     selectedDate,
     dailySummary,
-    activeBranch.name
+    activeBranch?.name || 'Maa Vaishno Enterprises'
   );
 
   return (

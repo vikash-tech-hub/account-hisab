@@ -64,7 +64,7 @@ export const QuickHisabParchi = ({ isOpen, onClose }) => {
 💵 *कुल उपलब्ध शुद्ध पूँजी (Net Capital): ${formatINR(netTotalCapital)}*
 📈 *आज का शुद्ध मुनाफा (Net Profit): ${formatINR(netTodayProfit)}*
 --------------------------------
-_Jan Seva Kendra 4-Pillars Digital System_`;
+_Maa Vaishno Enterprises 4-Pillars Digital System_`;
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
   };
 

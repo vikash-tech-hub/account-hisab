@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useHisab } from '../../context/HisabContext';
 import { formatINR } from '../../utils/formatters';
 import {
@@ -11,7 +11,10 @@ import {
   Coins,
   Sparkles,
   TrendingUp,
-  HelpCircle
+  HelpCircle,
+  Layers,
+  CalendarDays,
+  Globe2
 } from 'lucide-react';
 
 export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
@@ -20,16 +23,28 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
     totalBankBalance,
     totalJamaAmount,
     totalLiyaAmount,
+    allTimeJamaAmount,
+    allTimeLiyaAmount,
     totalExpenses,
+    allTimeExpenses,
     todaysExpenses,
     totalIncomes,
+    allTimeIncomes,
     todaysIncomes,
     netTotalCapital,
+    allTimeNetTotalCapital,
     activePortals,
     activeBankAccounts,
     activeJamaList,
-    activeLiyaList
+    activeLiyaList,
+    allTimeJamaList,
+    allTimeLiyaList,
+    summaryViewMode,
+    setSummaryViewMode,
+    selectedDate
   } = useHisab();
+
+  const isDaily = summaryViewMode === 'daily';
 
   const cards = [
     {
@@ -37,6 +52,7 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
       title: '1. All Portals',
       hindi: 'सभी 10 पोर्टल बैलेंस',
       amount: totalPortalsBalance,
+      subAmount: null,
       count: `${activePortals.length} IDs`,
       icon: CreditCard,
       border: 'hover:border-amber-500/50',
@@ -50,6 +66,7 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
       title: '2. Bank & Cash',
       hindi: 'बैंक व गल्ला कैश',
       amount: totalBankBalance,
+      subAmount: null,
       count: `${activeBankAccounts.length} A/C`,
       icon: Landmark,
       border: 'hover:border-sky-500/50',
@@ -62,8 +79,10 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
       id: 'jama',
       title: '3. People Jama',
       hindi: 'ग्राहकों का जमा कैश',
-      amount: totalJamaAmount,
-      count: `${activeJamaList.length} जमा`,
+      amount: isDaily ? totalJamaAmount : allTimeJamaAmount,
+      subAmount: isDaily ? allTimeJamaAmount : totalJamaAmount,
+      subLabel: isDaily ? 'अब तक कुल' : 'इस दिन का',
+      count: isDaily ? `${activeJamaList.length} जमा (दिन)` : `${allTimeJamaList?.length || 0} कुल जमा`,
       icon: ArrowDownLeft,
       border: 'hover:border-emerald-500/50',
       activeBorder: 'ring-2 ring-emerald-500 bg-emerald-500/10 border-emerald-500/60',
@@ -75,8 +94,10 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
       id: 'liya',
       title: '4. People Liya',
       hindi: 'उधार / निकासी दिया',
-      amount: totalLiyaAmount,
-      count: `${activeLiyaList.length} निकासी`,
+      amount: isDaily ? totalLiyaAmount : allTimeLiyaAmount,
+      subAmount: isDaily ? allTimeLiyaAmount : totalLiyaAmount,
+      subLabel: isDaily ? 'अब तक कुल' : 'इस दिन का',
+      count: isDaily ? `${activeLiyaList.length} निकासी (दिन)` : `${allTimeLiyaList?.length || 0} कुल निकासी`,
       icon: ArrowUpRight,
       border: 'hover:border-rose-500/50',
       activeBorder: 'ring-2 ring-rose-500 bg-rose-500/10 border-rose-500/60',
@@ -88,8 +109,10 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
       id: 'incomes',
       title: '5. Other Income',
       hindi: 'AEPS/DMT/PF/Xerox कमाई',
-      amount: totalIncomes,
-      count: `${todaysIncomes.length} सेवा`,
+      amount: isDaily ? totalIncomes : allTimeIncomes,
+      subAmount: isDaily ? allTimeIncomes : totalIncomes,
+      subLabel: isDaily ? 'अब तक कुल' : 'इस दिन का',
+      count: isDaily ? `${todaysIncomes.length} सेवा (दिन)` : `${isDaily ? todaysIncomes.length : 'कुल सेवा'}`,
       icon: Coins,
       border: 'hover:border-teal-500/50',
       activeBorder: 'ring-2 ring-teal-500 bg-teal-500/10 border-teal-500/60',
@@ -101,8 +124,10 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
       id: 'expenses',
       title: '6. Shop Kharcha',
       hindi: 'चाय, पेपर व दुकान खर्च',
-      amount: totalExpenses,
-      count: `${todaysExpenses.length} खर्च`,
+      amount: isDaily ? totalExpenses : allTimeExpenses,
+      subAmount: isDaily ? allTimeExpenses : totalExpenses,
+      subLabel: isDaily ? 'अब तक कुल' : 'इस दिन का',
+      count: isDaily ? `${todaysExpenses.length} खर्च (दिन)` : `${isDaily ? todaysExpenses.length : 'कुल खर्च'}`,
       icon: Receipt,
       border: 'hover:border-pink-500/50',
       activeBorder: 'ring-2 ring-pink-500 bg-pink-500/10 border-pink-500/60',
@@ -112,8 +137,54 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
     }
   ];
 
+  const currentNetCapital = isDaily ? netTotalCapital : allTimeNetTotalCapital;
+  const currentJamaVal = isDaily ? totalJamaAmount : allTimeJamaAmount;
+  const currentLiyaVal = isDaily ? totalLiyaAmount : allTimeLiyaAmount;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3.5">
+      
+      {/* Top Bar Switcher: Daily (आज/चुना दिन) vs All-Time Cumulative (अब तक का कुल) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Summary View Mode:</span>
+          </span>
+          <span className="text-[11px] font-semibold text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700">
+            {isDaily ? '📅 इस दिन का हिसाब' : '🌐 अब तक का कुल रिकॉर्ड'}
+          </span>
+        </div>
+
+        {/* Dual Mode Toggle Switcher */}
+        <div className="flex items-center p-1 bg-slate-950/90 border border-slate-800 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setSummaryViewMode('daily')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              isDaily
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <CalendarDays className="w-3.5 h-3.5" />
+            <span>📅 आज / चुना दिन (Daily)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSummaryViewMode('all_time')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              !isDaily
+                ? 'bg-emerald-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <Globe2 className="w-3.5 h-3.5" />
+            <span>🌐 अब तक कुल (All-Time)</span>
+          </button>
+        </div>
+      </div>
+
       {/* 6 Core Pillars Metric Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {cards.map((c) => {
@@ -124,36 +195,50 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
             <div
               key={c.id}
               onClick={() => setActiveSection && setActiveSection(c.id)}
-              className={`p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900/90 border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md relative overflow-hidden group ${
+              className={`p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900/90 border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md relative overflow-hidden group flex flex-col justify-between ${
                 isSelected
                   ? c.activeBorder
                   : `border-slate-200 dark:border-slate-800 ${c.border}`
               }`}
             >
-              <div className="flex items-start justify-between gap-1.5">
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1">
-                    {c.title}
+              <div>
+                <div className="flex items-start justify-between gap-1.5">
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1">
+                      {c.title}
+                    </div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate font-medium">
+                      {c.hindi}
+                    </div>
                   </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate font-medium">
-                    {c.hindi}
+
+                  <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shrink-0 group-hover:scale-110 transition-transform">
+                    <Icon className={`w-3.5 h-3.5 ${c.textColor}`} />
                   </div>
                 </div>
 
-                <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shrink-0 group-hover:scale-110 transition-transform">
-                  <Icon className={`w-3.5 h-3.5 ${c.textColor}`} />
+                <div className="mt-3 flex items-baseline justify-between gap-1">
+                  <div className={`text-lg sm:text-xl font-black font-mono tracking-tight truncate ${c.textColor}`}>
+                    {formatINR(c.amount)}
+                  </div>
+
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 border ${c.badgeBg}`}>
+                    {c.count}
+                  </span>
                 </div>
               </div>
 
-              <div className="mt-3 flex items-baseline justify-between gap-1">
-                <div className={`text-lg sm:text-xl font-black font-mono tracking-tight truncate ${c.textColor}`}>
-                  {formatINR(c.amount)}
+              {/* Sub-label showing the other balance (Daily vs All-Time) */}
+              {c.subAmount !== null && (
+                <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-1.5 bg-slate-100/90 dark:bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-slate-800">
+                  <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 tracking-tight truncate">
+                    {c.subLabel}:
+                  </span>
+                  <span className={`text-xs font-mono font-black ${c.textColor}`}>
+                    {formatINR(c.subAmount)}
+                  </span>
                 </div>
-
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 border ${c.badgeBg}`}>
-                  {c.count}
-                </span>
-              </div>
+              )}
             </div>
           );
         })}
@@ -168,11 +253,11 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-indigo-950 dark:text-indigo-200">
-                Total Available Capital / Net Hisab (कुल पूँजी & शुद्ध हिसाब)
+                Total Available Capital / Net Hisab ({isDaily ? 'दैनिक शुद्ध पूँजी' : 'अब तक कुल शुद्ध पूँजी'})
               </span>
               <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-500/30 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                Live Tally
+                {isDaily ? 'Live Daily Tally' : 'All-Time Net Balance'}
               </span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-medium flex flex-wrap items-center gap-1.5">
@@ -185,11 +270,11 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
               </span>
               <span className="text-slate-400 font-bold">+</span>
               <span className="bg-rose-100 text-rose-900 dark:bg-rose-500/15 dark:text-rose-300 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-500/20 font-bold">
-                बाजार उधार ({formatINR(totalLiyaAmount)})
+                {isDaily ? 'आज का उधार' : 'कुल बाजार उधार'} ({formatINR(currentLiyaVal)})
               </span>
               <span className="text-slate-400 font-bold">-</span>
               <span className="bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-500/20 font-bold">
-                ग्राहक जमा ({formatINR(totalJamaAmount)})
+                {isDaily ? 'आज की जमा' : 'कुल ग्राहक जमा'} ({formatINR(currentJamaVal)})
               </span>
             </p>
           </div>
@@ -197,9 +282,11 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
 
         <div className="flex items-center gap-3 bg-white dark:bg-slate-950/90 px-4 sm:px-6 py-3 rounded-xl border border-indigo-200 dark:border-indigo-500/40 shrink-0 shadow-sm dark:shadow-lg">
           <div>
-            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Total Net Capital</div>
+            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">
+              {isDaily ? 'Daily Net Capital' : 'All-Time Net Capital'}
+            </div>
             <div className="text-xl sm:text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
-              {formatINR(netTotalCapital)}
+              {formatINR(currentNetCapital)}
             </div>
           </div>
         </div>

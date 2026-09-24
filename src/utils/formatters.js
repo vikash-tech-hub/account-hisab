@@ -20,7 +20,22 @@ export const formatINRPrecise = (amount, showSymbol = true) => {
 
 export const formatDate = (dateString) => {
   if (!dateString) return '';
+  const parts = String(dateString).split('-');
+  if (parts.length === 3) {
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+      const date = new Date(y, m, d);
+      return date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+  }
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return String(dateString);
   return date.toLocaleDateString('en-IN', {
     day: '2-digit',
     month: 'short',
@@ -30,7 +45,23 @@ export const formatDate = (dateString) => {
 
 export const formatDateFull = (dateString) => {
   if (!dateString) return '';
+  const parts = String(dateString).split('-');
+  if (parts.length === 3) {
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+      const date = new Date(y, m, d);
+      return date.toLocaleDateString('en-IN', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+  }
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
   return date.toLocaleDateString('en-IN', {
     weekday: 'long',
     day: 'numeric',

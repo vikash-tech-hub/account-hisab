@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useHisab } from '../../context/HisabContext';
 import { formatINR, formatDate } from '../../utils/formatters';
 import {
@@ -12,6 +12,8 @@ import {
   Phone,
   Plus,
   X,
+  Pin,
+  Pencil,
   Calendar,
   CheckCircle2,
   TrendingUp,
@@ -31,7 +33,9 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
   const {
     customers,
     addCustomer,
+    updateCustomer,
     deleteCustomer,
+    toggleCustomerPin,
     customerLedgers,
     activeJamaList,
     activeLiyaList,
@@ -63,6 +67,11 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
   const [newCustName, setNewCustName] = useState('');
   const [newCustPhone, setNewCustPhone] = useState('');
   const [newCustCategory, setNewCustCategory] = useState('');
+  const [newCustPincode, setNewCustPincode] = useState('');
+  const [isPinned, setIsPinned] = useState(false);
+
+  // Edit Party Modal
+  const [editingCustomer, setEditingCustomer] = useState(null);
 
   // Quick Action Modal for Jama / Liya
   const [activeTxModal, setActiveTxModal] = useState(null); // { type: 'JAMA' | 'LIYA', customer: object }
@@ -81,23 +90,26 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
   const [inlineLiyaAccount, setInlineLiyaAccount] = useState('Cash in Hand');
   const [inlineLiyaNote, setInlineLiyaNote] = useState('');
 
-  // Filtered Customers for sidebar
+  // Filtered Customers for sidebar (Pinned customers float to the top)
   const filteredCustomers = useMemo(() => {
-    return customerLedgers.filter((c) => {
-      const matchSearch =
-        !search ||
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        (c.phone && c.phone.includes(search)) ||
-        (c.category && c.category.toLowerCase().includes(search.toLowerCase()));
+    return customerLedgers
+      .filter((c) => {
+        const matchSearch =
+          !search ||
+          c.name.toLowerCase().includes(search.toLowerCase()) ||
+          (c.phone && c.phone.includes(search)) ||
+          (c.pincode && c.pincode.includes(search)) ||
+          (c.category && c.category.toLowerCase().includes(search.toLowerCase()));
 
-      const matchFilter =
-        filterType === 'ALL' ||
-        (filterType === 'JAMA_PLUS' && c.netBalance > 0) ||
-        (filterType === 'UDHAR_MINUS' && c.netBalance < 0) ||
-        (filterType === 'SETTLED' && c.netBalance === 0);
+        const matchFilter =
+          filterType === 'ALL' ||
+          (filterType === 'JAMA_PLUS' && c.netBalance > 0) ||
+          (filterType === 'UDHAR_MINUS' && c.netBalance < 0) ||
+          (filterType === 'SETTLED' && c.netBalance === 0);
 
-      return matchSearch && matchFilter;
-    });
+        return matchSearch && matchFilter;
+      })
+      .sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
   }, [customerLedgers, search, filterType]);
 
   // Active selected customer object
@@ -110,21 +122,78 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
     );
   }, [customerLedgers, selectedCustomerId, filteredCustomers]);
 
+  // Smooth auto focus without blinking when modal opens
+  useEffect(() => {
+    if (isAddingCustomer) {
+      const timer = setTimeout(() => {
+        document.getElementById('new-cust-name-input')?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isAddingCustomer]);
+
+  useEffect(() => {
+    if (editingCustomer) {
+      const timer = setTimeout(() => {
+        document.getElementById('edit-cust-name-input')?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [editingCustomer?.id]);
+
   // Handle Add New Customer
-  const handleSaveNewCustomer = (e) => {
-    e.preventDefault();
-    if (!newCustName.trim()) return;
+  const handleSaveNewCustomer = (e, addAnother = false) => {
+    if (e) e.preventDefault();
+    if (!newCustName.trim()) {
+      showToast('कृपया ग्राहक/पार्टी का नाम भरें', 'error');
+      document.getElementById('new-cust-name-input')?.focus();
+      return;
+    }
     const created = addCustomer({
       name: newCustName.trim(),
       phone: newCustPhone.trim(),
       category: newCustCategory.trim() || 'General Customer',
-      address: ''
+      pincode: newCustPincode.trim(),
+      address: '',
+      isPinned: Boolean(isPinned)
     });
     setSelectedCustomerId(created.id);
-    setNewCustName('');
-    setNewCustPhone('');
-    setNewCustCategory('');
-    setIsAddingCustomer(false);
+    showToast(`✅ पार्टी "${created.name}" सफलतापूर्वक जोड़ी गई!`);
+
+    if (addAnother) {
+      setNewCustName('');
+      setNewCustPhone('');
+      setNewCustCategory('');
+      setNewCustPincode('');
+      setIsPinned(false);
+      setTimeout(() => {
+        document.getElementById('new-cust-name-input')?.focus();
+      }, 50);
+    } else {
+      setNewCustName('');
+      setNewCustPhone('');
+      setNewCustCategory('');
+      setNewCustPincode('');
+      setIsPinned(false);
+      setIsAddingCustomer(false);
+    }
+  };
+
+  // Handle Update Customer
+  const handleUpdateCustomer = (e) => {
+    if (e) e.preventDefault();
+    if (!editingCustomer || !editingCustomer.name.trim()) {
+      showToast('कृपया ग्राहक/पार्टी का नाम भरें', 'error');
+      return;
+    }
+    updateCustomer(editingCustomer.id, {
+      name: editingCustomer.name.trim(),
+      phone: editingCustomer.phone ? editingCustomer.phone.trim() : '',
+      category: editingCustomer.category ? editingCustomer.category.trim() : 'General Customer',
+      pincode: editingCustomer.pincode ? editingCustomer.pincode.trim() : '',
+      isPinned: Boolean(editingCustomer.isPinned)
+    });
+    setEditingCustomer(null);
   };
 
   // Handle Transaction Submit (from Modal)
@@ -339,12 +408,34 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
                           {c.name.charAt(0).toUpperCase()}
                         </div>
 
-                        <div className="min-w-0">
-                          <div className="text-xs font-bold text-white truncate group-hover:text-indigo-300 transition-colors">
-                            {c.name}
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors flex items-center gap-1.5">
+                            <span className="truncate">{c.name}</span>
+                            {c.isPinned && (
+                              <Pin className="w-3 h-3 text-amber-500 fill-amber-500 rotate-45 shrink-0" title="Pinned Party" />
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingCustomer({
+                                  id: c.id,
+                                  name: c.name,
+                                  phone: c.phone || '',
+                                  pincode: c.pincode || '',
+                                  category: c.category || 'General Customer',
+                                  isPinned: Boolean(c.isPinned)
+                                });
+                              }}
+                              className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded transition-all cursor-pointer opacity-70 group-hover:opacity-100"
+                              title="✏️ पार्टी विवरण बदलें (Edit Party)"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
                           </div>
-                          <div className="text-[10px] text-slate-400 font-mono truncate">
-                            {c.phone || c.category || 'General'}
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate flex items-center gap-1.5">
+                            <span>{c.phone || c.category || 'General'}</span>
+                            {c.pincode && <span>• PIN: {c.pincode}</span>}
                           </div>
                         </div>
                       </div>
@@ -393,7 +484,44 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
                       {activeCustomer.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="text-base font-black text-white">{activeCustomer.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-black text-white">{activeCustomer.name}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleCustomerPin(activeCustomer.id);
+                          }}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all flex items-center gap-1 cursor-pointer ${
+                            activeCustomer.isPinned
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                              : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-amber-400 hover:border-amber-400/40'
+                          }`}
+                          title={activeCustomer.isPinned ? '📌 Pinned Party (क्लिक करके अनपिन करें)' : '📌 Pin Party (क्लिक करके ऊपर पिन करें)'}
+                        >
+                          <Pin className={`w-3 h-3 ${activeCustomer.isPinned ? 'fill-amber-400 text-amber-400 rotate-45' : 'rotate-45'}`} />
+                          <span>{activeCustomer.isPinned ? 'Pinned' : 'Pin'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingCustomer({
+                              id: activeCustomer.id,
+                              name: activeCustomer.name,
+                              phone: activeCustomer.phone || '',
+                              pincode: activeCustomer.pincode || '',
+                              category: activeCustomer.category || 'General Customer',
+                              isPinned: Boolean(activeCustomer.isPinned)
+                            });
+                          }}
+                          className="px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-all flex items-center gap-1 cursor-pointer bg-slate-800 text-slate-300 border-slate-700 hover:text-indigo-400 hover:border-indigo-500/50"
+                          title="✏️ पार्टी का नाम, फ़ोन, पिन कोड बदलें (Edit Details)"
+                        >
+                          <Pencil className="w-3 h-3 text-indigo-400" />
+                          <span>Edit</span>
+                        </button>
+                      </div>
                       <div className="text-xs text-slate-400 font-mono flex items-center gap-2 mt-0.5">
                         {activeCustomer.phone && (
                           <span className="flex items-center gap-1">
@@ -404,6 +532,11 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
                         <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-indigo-300">
                           {activeCustomer.category}
                         </span>
+                        {activeCustomer.pincode && (
+                          <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">
+                            PIN: {activeCustomer.pincode}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -817,73 +950,179 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
       {/* MODAL 1: ADD NEW PARTY / CUSTOMER TO MASTER                                */}
       {/* ========================================================================= */}
       {isAddingCustomer && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-indigo-500/40 rounded-2xl p-5 max-w-md w-full shadow-2xl space-y-4 animate-scaleIn">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-indigo-400" />
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-indigo-500/40 rounded-3xl p-5 max-w-md w-full shadow-2xl space-y-4 animate-scaleIn">
+            {/* Header with Title + Pin Party Button + Close */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 <span>Add New Party to Khata (नया ग्राहक/पार्टी)</span>
               </h3>
-              <button
-                onClick={() => setIsAddingCustomer(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <form onSubmit={handleSaveNewCustomer} className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Customer / Party Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Ramesh Kumar Verma (Dairy)"
-                  value={newCustName}
-                  onChange={(e) => setNewCustName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+              <div className="flex items-center gap-2">
+                {/* 📌 Pin Party to Top Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsPinned(!isPinned)}
+                  className={`px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer ${
+                    isPinned
+                      ? 'bg-amber-500 text-white border-amber-600 shadow-md ring-2 ring-amber-400/40'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:text-amber-600 dark:hover:text-amber-400 hover:border-amber-400'
+                  }`}
+                  title={isPinned ? '📌 Party is Pinned to top of Khata (क्लिक करके अनपिन करें)' : '📌 Pin Party to top of Khata (लिस्ट में सबसे ऊपर रखें)'}
+                >
+                  <Pin className={`w-4 h-4 ${isPinned ? 'fill-white text-white rotate-45' : 'text-amber-500 rotate-45'}`} />
+                  <span>{isPinned ? '📌 Pinned (पिन है)' : '📌 Pin (पिन करें)'}</span>
+                </button>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Mobile Number (Optional)
-                </label>
-                <input
-                  type="tel"
-                  placeholder="e.g. 9839123456"
-                  value={newCustPhone}
-                  onChange={(e) => setNewCustPhone(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Category / Business Type
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Dairy / Mobile Shop / Farmer"
-                  value={newCustCategory}
-                  onChange={(e) => setNewCustCategory(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsAddingCustomer(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={(e) => handleSaveNewCustomer(e, false)} className="space-y-3.5" autoComplete="off">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Customer / Party Full Name *
+                </label>
+                <input
+                  id="new-cust-name-input"
+                  name="cust_full_name_no_autofill"
+                  type="text"
+                  required
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-form-type="other"
+                  placeholder="e.g. Ramesh Kumar Verma (Dairy)"
+                  value={newCustName}
+                  onChange={(e) => setNewCustName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      document.getElementById('new-cust-phone-input')?.focus();
+                    }
+                  }}
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Mobile Number (Optional)
+                  </label>
+                  <input
+                    id="new-cust-phone-input"
+                    name="cust_phone_no_autofill"
+                    type="tel"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-form-type="other"
+                    placeholder="e.g. 9839123456"
+                    value={newCustPhone}
+                    onChange={(e) => setNewCustPhone(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('new-cust-pin-input')?.focus();
+                      }
+                    }}
+                    className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Area PIN Code / पिन कोड
+                  </label>
+                  <input
+                    id="new-cust-pin-input"
+                    name="cust_pin_no_autofill"
+                    type="text"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-form-type="other"
+                    placeholder="e.g. 226001"
+                    value={newCustPincode}
+                    onChange={(e) => setNewCustPincode(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('new-cust-category-input')?.focus();
+                      }
+                    }}
+                    className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Category / Business Type
+                </label>
+                <input
+                  id="new-cust-category-input"
+                  name="cust_category_no_autofill"
+                  type="text"
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-form-type="other"
+                  placeholder="e.g. Dairy / Mobile Shop / Farmer"
+                  value={newCustCategory}
+                  onChange={(e) => setNewCustCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSaveNewCustomer(null, true);
+                    }
+                  }}
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingCustomer(false)}
+                  className="px-3.5 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSaveNewCustomer(null, true)}
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold transition-all shadow-md flex items-center gap-1 cursor-pointer border border-amber-500/30"
+                  title="पार्टी सेव करके तुरंत अगला नाम जोड़ें"
+                >
+                  <Plus className="w-3.5 h-3.5 text-amber-400" />
+                  <span>+ Save & Add Next</span>
+                </button>
+
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
                 >
                   Save Party to Khata
                 </button>
@@ -894,7 +1133,198 @@ export const PeopleMasterPillar = ({ onNext, onPrev }) => {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 2: 1-CLICK QUICK JAMA / LIYA ENTRY FOR CUSTOMER                     */}
+      {/* MODAL 2: EDIT PARTY / CUSTOMER DETAILS                                     */}
+      {/* ========================================================================= */}
+      {editingCustomer && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-indigo-500/40 rounded-3xl p-5 max-w-md w-full shadow-2xl space-y-4 animate-scaleIn">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Pencil className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                <span>पार्टी विवरण बदलें (Edit Party Details)</span>
+              </h3>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingCustomer(prev => ({ ...prev, isPinned: !prev.isPinned }))}
+                  className={`px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer ${
+                    editingCustomer.isPinned
+                      ? 'bg-amber-500 text-white border-amber-600 shadow-md ring-2 ring-amber-400/40'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:text-amber-600 dark:hover:text-amber-400'
+                  }`}
+                  title={editingCustomer.isPinned ? '📌 Party is Pinned to top' : '📌 Click to Pin'}
+                >
+                  <Pin className={`w-4 h-4 ${editingCustomer.isPinned ? 'fill-white text-white rotate-45' : 'text-amber-500 rotate-45'}`} />
+                  <span>{editingCustomer.isPinned ? '📌 Pinned' : '📌 Pin'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEditingCustomer(null)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleUpdateCustomer} className="space-y-3.5" autoComplete="off">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Customer / Party Full Name *
+                </label>
+                <input
+                  id="edit-cust-name-input"
+                  name="edit_cust_name"
+                  type="text"
+                  required
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-form-type="other"
+                  placeholder="e.g. Ramesh Kumar Verma"
+                  value={editingCustomer.name}
+                  onChange={(e) => setEditingCustomer({ ...editingCustomer, name: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      document.getElementById('edit-cust-phone-input')?.focus();
+                    }
+                  }}
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Mobile Number
+                  </label>
+                  <input
+                    id="edit-cust-phone-input"
+                    name="edit_cust_phone"
+                    type="tel"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-form-type="other"
+                    placeholder="e.g. 9839123456"
+                    value={editingCustomer.phone}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, phone: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('edit-cust-pin-input')?.focus();
+                      }
+                    }}
+                    className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Area PIN Code
+                  </label>
+                  <input
+                    id="edit-cust-pin-input"
+                    name="edit_cust_pin"
+                    type="text"
+                    autoComplete="new-password"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck="false"
+                    data-lpignore="true"
+                    data-1p-ignore="true"
+                    data-form-type="other"
+                    placeholder="e.g. 226001"
+                    value={editingCustomer.pincode}
+                    onChange={(e) => setEditingCustomer({ ...editingCustomer, pincode: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('edit-cust-category-input')?.focus();
+                      }
+                    }}
+                    className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Category / Business Type
+                </label>
+                <input
+                  id="edit-cust-category-input"
+                  name="edit_cust_category"
+                  type="text"
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
+                  data-lpignore="true"
+                  data-1p-ignore="true"
+                  data-form-type="other"
+                  placeholder="e.g. Dairy / Mobile Shop / Farmer"
+                  value={editingCustomer.category}
+                  onChange={(e) => setEditingCustomer({ ...editingCustomer, category: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleUpdateCustomer(e);
+                    }
+                  }}
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`क्या आप वाकई "${editingCustomer.name}" को हटाना चाहते हैं?`)) {
+                      deleteCustomer(editingCustomer.id);
+                      setEditingCustomer(null);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Party</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingCustomer(null)}
+                    className="px-3.5 py-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>अपडेट सुरक्षित करें (Save Changes)</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: 1-CLICK QUICK JAMA / LIYA ENTRY FOR CUSTOMER                     */}
       {/* ========================================================================= */}
       {activeTxModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">

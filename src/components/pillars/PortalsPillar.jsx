@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useHisab } from '../../context/HisabContext';
 import { formatINR } from '../../utils/formatters';
+import { AddPortalModal } from '../portals/AddPortalModal';
 import {
   CreditCard,
   Plus,
@@ -30,11 +31,8 @@ export const PortalsPillar = ({ onNext }) => {
     triggerLoader
   } = useHisab();
 
-  const [isAdding, setIsAdding] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [entryMode, setEntryMode] = useState('direct'); // 'direct' (Aaj ka balance) or 'detailed' (Inflow/Outflow)
-  const [newPortalName, setNewPortalName] = useState('');
-  const [newPortalCode, setNewPortalCode] = useState('');
-  const [newPortalOpening, setNewPortalOpening] = useState('');
 
   const yesterdayDate = getPreviousDateString ? getPreviousDateString(selectedDate) : 'कल';
 
@@ -136,48 +134,14 @@ export const PortalsPillar = ({ onNext }) => {
 
           {/* Add Portal Button */}
           <button
-            onClick={() => setIsAdding(!isAdding)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition-colors"
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition-all cursor-pointer hover:shadow-indigo-600/30"
           >
             <Plus className="w-4 h-4" />
-            <span>{isAdding ? 'Close' : '+ Add Portal'}</span>
+            <span>+ Add Portal</span>
           </button>
         </div>
       </div>
-
-      {/* Inline Add Portal Form */}
-      {isAdding && (
-        <form onSubmit={handleAddSubmit} className="p-4 rounded-xl bg-slate-950 border border-indigo-500/30 grid grid-cols-1 sm:grid-cols-4 gap-3 animate-fadeIn">
-          <input
-            type="text"
-            required
-            placeholder="Portal Name (e.g. Spice Money)"
-            value={newPortalName}
-            onChange={(e) => setNewPortalName(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
-          />
-          <input
-            type="text"
-            placeholder="Agent ID Code (e.g. SM-123)"
-            value={newPortalCode}
-            onChange={(e) => setNewPortalCode(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-          />
-          <input
-            type="number"
-            placeholder="Opening Balance (₹)"
-            value={newPortalOpening}
-            onChange={(e) => setNewPortalOpening(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-          />
-          <button
-            type="submit"
-            className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg py-2 transition-colors"
-          >
-            Save Portal
-          </button>
-        </form>
-      )}
 
       {/* Portals Table */}
       <div className="overflow-x-auto">
@@ -375,6 +339,12 @@ export const PortalsPillar = ({ onNext }) => {
           </button>
         </div>
       </div>
+
+      {/* Add Portal Modal (Supports 1-by-1 fast continuous entries and bulk presets) */}
+      <AddPortalModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
     </div>
   );
 };

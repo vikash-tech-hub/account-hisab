@@ -3,6 +3,7 @@ import { useHisab } from '../../context/HisabContext';
 import { formatINR } from '../../utils/formatters';
 import { AddBranchModal } from '../branches/AddBranchModal';
 import { ResetModal } from '../common/ResetModal';
+import { ThemeToggle } from '../common/ThemeToggle';
 import {
   Building2,
   Calendar,
@@ -204,8 +205,11 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
               </div>
             </div>
 
-            {/* Right: Reset Fresh Button + Add Shop CTA + Date Picker & Print CTA */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Right: Theme Toggle + Reset Fresh Button + Add Shop CTA + Date Picker & Print CTA */}
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              {/* ☀️ / 🌙 Light & Dark Theme Toggle Button */}
+              <ThemeToggle />
+
               {/* 🔄 Reset & Fresh Start Button (Exact location of red box) */}
               <button
                 onClick={() => setIsResetModalOpen(true)}

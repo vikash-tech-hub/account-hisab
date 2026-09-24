@@ -39,8 +39,8 @@ const MainContent = () => {
     { id: 'incomes', label: '4. 💰 अन्य कमाई (+Income)', color: 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 ring-2 ring-teal-400/50' },
     { id: 'expenses', label: '5. ☕ दुकान खर्च (-Kharcha)', color: 'bg-pink-600 text-white shadow-lg shadow-pink-600/30 ring-2 ring-pink-400/50' },
     { id: 'profit', label: '6. 📊 मुनाफ़ा रिपोर्ट (Profit)', color: 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 ring-2 ring-purple-400/50' },
-    { id: 'history', label: '7. 📜 इतिहास (Past Data)', color: 'bg-slate-700 text-white shadow-lg' },
-    { id: 'all', label: '🌟 All-in-1 (सब एक साथ)', color: 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' }
+    { id: 'history', label: '7. 📜 इतिहास (Past Data)', color: 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-2 ring-blue-400/50' },
+    { id: 'all', label: '🌟 All-in-1 (सब एक साथ)', color: 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400/50' }
   ];
 
   return (
@@ -69,8 +69,8 @@ const MainContent = () => {
           onClose={() => setIsSidebarOpen(false)}
         />
 
-        {/* Main Content Area - Full width */}
-        <main className="flex-1 lg:pl-64 p-3 sm:p-5 lg:p-6 w-full space-y-5 min-w-0">
+        {/* Main Content Area - Full width with balanced spacing */}
+        <main className="flex-1 lg:ml-64 p-3 sm:p-4 lg:p-5 w-full space-y-4 min-w-0">
           
           {/* Interactive Date & History Switcher (Today, Yesterday, Custom Date) */}
           <DateNavigator />
@@ -91,10 +91,10 @@ const MainContent = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shadow-sm ${
                       isActive
                         ? tab.color
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800/80 bg-slate-950/60 border border-slate-800'
+                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white bg-white dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80'
                     }`}
                   >
                     {tab.label}

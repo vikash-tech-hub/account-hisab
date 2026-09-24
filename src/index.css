@@ -3,9 +3,30 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-slate-900 text-slate-100 font-sans min-h-screen antialiased;
+  :root {
+    color-scheme: dark;
   }
+  
+  :root.light, html.light {
+    color-scheme: light;
+  }
+
+  body {
+    @apply font-sans min-h-screen antialiased transition-colors duration-200;
+  }
+
+  html.dark body, body.dark {
+    @apply bg-slate-950 text-slate-100;
+  }
+
+  html.light body, body.light {
+    @apply bg-slate-100 text-slate-900;
+  }
+}
+
+/* Global Smooth Transitions */
+button, input, select, .cursor-pointer {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Custom scrollbar */
@@ -22,6 +43,17 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(99, 102, 241, 0.6);
+}
+
+/* Light mode scrollbar */
+html.light ::-webkit-scrollbar-track {
+  background: rgba(226, 232, 240, 0.8);
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.4);
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
 }
 
 /* Glassmorphic utilities */
@@ -51,21 +83,281 @@
   box-shadow: 0 0 20px -5px rgba(244, 63, 94, 0.3);
 }
 
-/* Print specific stylesheet */
+/* Keyframe animations */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ==========================================================================
+   LIGHT THEME (Comprehensive FinTech Styling & Hover Effects)
+   ========================================================================== */
+
+/* Main App Container */
+html.light .min-h-screen {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Top Navbar & Sidebar */
+html.light header {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light aside {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Base Surfaces: Card backgrounds, panels, modals */
+html.light [class*="bg-slate-900"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light [class*="bg-slate-950"] {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light [class*="bg-slate-800"] {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light [class*="bg-slate-700"] {
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Borders */
+html.light [class*="border-slate-800"],
+html.light [class*="border-slate-700"],
+html.light [class*="border-slate-900"] {
+  border-color: #e2e8f0 !important;
+}
+
+html.light .divide-slate-800 > :not([hidden]) ~ :not([hidden]),
+html.light [class*="divide-slate-800"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+}
+
+/* Typography Overrides for Light Mode */
+html.light .text-white {
+  color: #0f172a;
+}
+
+html.light .text-slate-100,
+html.light .text-slate-200 {
+  color: #0f172a !important;
+}
+
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.light .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Maintain solid white text on colored action buttons, pills & badges */
+html.light .bg-indigo-600,
+html.light .bg-indigo-500,
+html.light .bg-emerald-600,
+html.light .bg-emerald-500,
+html.light .bg-rose-600,
+html.light .bg-rose-500,
+html.light .bg-amber-600,
+html.light .bg-amber-500,
+html.light .bg-sky-600,
+html.light .bg-sky-500,
+html.light .bg-teal-600,
+html.light .bg-pink-600,
+html.light .bg-purple-600,
+html.light .bg-blue-600 {
+  color: #ffffff !important;
+}
+
+html.light .bg-indigo-600 *,
+html.light .bg-indigo-500 *,
+html.light .bg-emerald-600 *,
+html.light .bg-emerald-500 *,
+html.light .bg-rose-600 *,
+html.light .bg-rose-500 *,
+html.light .bg-amber-600 *,
+html.light .bg-amber-500 *,
+html.light .bg-sky-600 *,
+html.light .bg-sky-500 *,
+html.light .bg-teal-600 *,
+html.light .bg-pink-600 *,
+html.light .bg-purple-600 *,
+html.light .bg-blue-600 * {
+  color: #ffffff !important;
+}
+
+/* Hover States & Micro-interactions in Light Mode */
+html.light .hover\:bg-slate-800:hover,
+html.light .hover\:bg-slate-900:hover,
+html.light [class*="hover:bg-slate-800"]:hover,
+html.light [class*="hover:bg-slate-900"]:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light .group:hover [class*="group-hover:text-indigo-300"],
+html.light [class*="group-hover:text-indigo-400"] {
+  color: #4f46e5 !important;
+}
+
+html.light [class*="hover:border-slate-700"]:hover {
+  border-color: #cbd5e1 !important;
+}
+
+html.light table tbody tr:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Specific Component Stylings for Customer / KhataBook Pillar */
+html.light [class*="from-slate-900"][class*="via-slate-900"] {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #eef2ff 100%) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Jama Panel & Items (Green Pillar) */
+html.light [class*="border-emerald-500/20"],
+html.light [class*="border-emerald-500/30"] {
+  background-color: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+}
+
+html.light [class*="border-emerald-950"] {
+  background-color: #ffffff !important;
+  border-color: #dcfce7 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light [class*="bg-emerald-950"] {
+  background-color: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #bbf7d0 !important;
+}
+
+/* Liya Panel & Items (Red Pillar) */
+html.light [class*="border-rose-500/20"],
+html.light [class*="border-rose-500/30"] {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+html.light [class*="border-rose-950"] {
+  background-color: #ffffff !important;
+  border-color: #ffe4e6 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light [class*="bg-rose-950"] {
+  background-color: #ffe4e6 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+/* Grand Net Capital Banner */
+html.light [class*="from-indigo-950/90"][class*="via-slate-900"] {
+  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 50%, #f0fdf4 100%) !important;
+  border-color: #c7d2fe !important;
+  box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.12) !important;
+}
+
+/* Form Inputs, Selects, and Textareas */
+html.light input:not([type="checkbox"]):not([type="radio"]),
+html.light select,
+html.light textarea {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  border-color: #6366f1 !important;
+  outline: 2px solid rgba(99, 102, 241, 0.2) !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Sticky Action Tabs & Subheaders */
+html.light .sticky.top-16 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Modal Backdrops & Dialogs */
+html.light [class*="fixed"][class*="inset-0"][class*="bg-slate-950"] {
+  background-color: rgba(15, 23, 42, 0.4) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Print Styles */
 @media print {
-  body {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body, html {
     background: #ffffff !important;
     color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
-  .no-print {
+  .no-print, nav, header, aside, .sticky {
     display: none !important;
   }
   .print-only {
     display: block !important;
   }
+  [class*="fixed"][class*="inset-0"] {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+  [class*="max-w-"], [class*="w-full"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
   .print-page {
     box-shadow: none !important;
-    border: 1px solid #000 !important;
-    color: #000 !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+    padding: 16px !important;
+    margin: 0 !important;
+    page-break-inside: auto !important;
+  }
+  table {
+    page-break-inside: avoid;
+  }
+  tr, .grid {
+    page-break-inside: avoid;
   }
 }

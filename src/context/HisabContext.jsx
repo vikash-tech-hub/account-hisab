@@ -23,10 +23,36 @@ const STORAGE_KEYS = {
   EXPENSES: 'jsk_v4_expenses',
   INCOMES: 'jsk_v4_incomes',
   SELECTED_BRANCH: 'jsk_v4_selected_branch',
-  SELECTED_DATE: 'jsk_v4_selected_date'
+  SELECTED_DATE: 'jsk_v4_selected_date',
+  THEME: 'jsk_v4_theme'
 };
 
 export const HisabProvider = ({ children }) => {
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+    return saved || 'dark';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
+      document.body.classList.remove('dark');
+      document.body.classList.add('light');
+    }
+    localStorage.setItem(STORAGE_KEYS.THEME, theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   const [branches, setBranches] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.BRANCHES);
     return saved ? JSON.parse(saved) : INITIAL_BRANCHES;
@@ -310,23 +336,25 @@ export const HisabProvider = ({ children }) => {
   // Available History Dates
   const availableHistoryDates = useMemo(() => {
     const datesSet = new Set([getTodayDateString(), getOffsetDateString(-1), getOffsetDateString(-2)]);
+    const isValidDateStr = (str) => typeof str === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(str);
+
     Object.keys(dailyPortals).forEach(k => {
       const parts = k.split('_');
-      if (parts[1]) datesSet.add(parts[1]);
+      if (parts[1] && isValidDateStr(parts[1])) datesSet.add(parts[1]);
     });
     jamaRecords.forEach(r => {
-      if (r.date) datesSet.add(r.date);
+      if (isValidDateStr(r.date)) datesSet.add(r.date);
     });
     liyaRecords.forEach(r => {
-      if (r.date) datesSet.add(r.date);
+      if (isValidDateStr(r.date)) datesSet.add(r.date);
     });
     expenses.forEach(e => {
-      if (e.date) datesSet.add(e.date);
+      if (isValidDateStr(e.date)) datesSet.add(e.date);
     });
     incomes.forEach(i => {
-      if (i.date) datesSet.add(i.date);
+      if (isValidDateStr(i.date)) datesSet.add(i.date);
     });
-    return Array.from(datesSet).sort().reverse();
+    return Array.from(datesSet).filter(isValidDateStr).sort().reverse();
   }, [dailyPortals, jamaRecords, liyaRecords, expenses, incomes]);
 
   // 1. Total All Portals Closing Balance
@@ -529,16 +557,43 @@ export const HisabProvider = ({ children }) => {
       name: data.name,
       phone: data.phone || '',
       category: data.category || 'Customer / Party',
-      address: data.address || ''
+      address: data.address || '',
+      pincode: data.pincode || '',
+      isPinned: Boolean(data.isPinned)
     };
     setCustomers(prev => [newCust, ...prev]);
     showToast(`Added to Party Master: ${data.name}`);
     return newCust;
   };
 
+  const toggleCustomerPin = (id) => {
+    setCustomers(prev => prev.map(c => {
+      if (c.id === id) {
+        const nextState = !c.isPinned;
+        showToast(nextState ? `📌 ${c.name} को ऊपर पिन किया गया` : `Unpinned ${c.name}`, 'info');
+        return { ...c, isPinned: nextState };
+      }
+      return c;
+    }));
+  };
+
   const updateCustomer = (id, updates) => {
-    setCustomers(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
-    showToast('Customer details updated');
+    let oldName = null;
+    setCustomers(prev => prev.map(c => {
+      if (c.id === id) {
+        oldName = c.name;
+        return { ...c, ...updates };
+      }
+      return c;
+    }));
+
+    if (oldName && updates.name && updates.name.trim().toLowerCase() !== oldName.trim().toLowerCase()) {
+      const newName = updates.name.trim();
+      setJamaRecords(prev => prev.map(j => j.name.trim().toLowerCase() === oldName.trim().toLowerCase() ? { ...j, name: newName, phone: updates.phone || j.phone } : j));
+      setLiyaRecords(prev => prev.map(l => l.name.trim().toLowerCase() === oldName.trim().toLowerCase() ? { ...l, name: newName, phone: updates.phone || l.phone } : l));
+    }
+
+    showToast(`✅ ${updates.name || 'पार्टी'} की जानकारी अपडेट हो गई!`);
   };
 
   const deleteCustomer = (id) => {
@@ -624,6 +679,8 @@ export const HisabProvider = ({ children }) => {
         phone: c.phone || '',
         category: c.category || 'Customer / Party',
         address: c.address || '',
+        pincode: c.pincode || '',
+        isPinned: Boolean(c.isPinned),
         jamaList: [],
         liyaList: [],
         totalJama: 0,
@@ -643,6 +700,8 @@ export const HisabProvider = ({ children }) => {
           phone: j.phone || '',
           category: 'Customer / Party',
           address: '',
+          pincode: '',
+          isPinned: false,
           jamaList: [],
           liyaList: [],
           totalJama: 0,
@@ -670,6 +729,8 @@ export const HisabProvider = ({ children }) => {
           phone: l.phone || '',
           category: 'Customer / Party',
           address: '',
+          pincode: '',
+          isPinned: false,
           jamaList: [],
           liyaList: [],
           totalJama: 0,
@@ -695,7 +756,10 @@ export const HisabProvider = ({ children }) => {
         netBalance,
         status: netBalance > 0 ? 'JAMA_PLUS' : netBalance < 0 ? 'UDHAR_MINUS' : 'SETTLED'
       };
-    }).sort((a, b) => (b.todayJama + b.todayLiya) - (a.todayJama + a.todayLiya));
+    }).sort((a, b) => {
+      if (a.isPinned !== b.isPinned) return (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0);
+      return (b.todayJama + b.todayLiya) - (a.todayJama + a.todayLiya);
+    });
   }, [customers, jamaRecords, liyaRecords, selectedDate]);
 
   // Carry Forward All Yesterday Balances (Portals + Banks/Cash)
@@ -931,6 +995,7 @@ export const HisabProvider = ({ children }) => {
         addCustomer,
         updateCustomer,
         deleteCustomer,
+        toggleCustomerPin,
         customerLedgers,
         activeJamaList,
         activeLiyaList,
@@ -972,7 +1037,10 @@ export const HisabProvider = ({ children }) => {
         closeLoader,
         clearAllDataToFresh,
         resetToDemoData,
-        resetAllData
+        resetAllData,
+        theme,
+        setTheme,
+        toggleTheme
       }}
     >
       {children}

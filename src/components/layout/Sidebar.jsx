@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useHisab } from '../../context/HisabContext';
 import { ResetModal } from '../common/ResetModal';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
   const {
@@ -198,8 +199,13 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
           </nav>
         </div>
 
-        {/* Bottom utility: Reset & Fresh Start */}
+        {/* Bottom utility: Theme Toggle + Reset & Fresh Start */}
         <div className="pt-3 border-t border-slate-800/80 space-y-2 mt-4">
+          <div className="flex items-center justify-between p-2 rounded-xl bg-slate-950/60 border border-slate-800">
+            <span className="text-xs font-semibold text-slate-300">थीम मोड (Theme)</span>
+            <ThemeToggle variant="compact" />
+          </div>
+
           <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
             <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11px]">
               <Sparkles className="w-3.5 h-3.5" />

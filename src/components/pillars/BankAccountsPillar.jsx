@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useHisab } from '../../context/HisabContext';
 import { formatINR } from '../../utils/formatters';
+import { CashDenominationModal } from '../common/CashDenominationModal';
+import { AddBankAccountModal } from '../banks/AddBankAccountModal';
 import {
   Landmark,
   Plus,
@@ -12,7 +14,9 @@ import {
   TrendingUp,
   TrendingDown,
   Layers,
-  Sparkles
+  Sparkles,
+  Calculator,
+  Lock
 } from 'lucide-react';
 
 export const BankAccountsPillar = ({ onNext, onPrev }) => {
@@ -21,7 +25,6 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
     totalBankBalance,
     updateBankAccount,
     setBankAccountDirectTodayBalance,
-    addBankAccount,
     deleteBankAccount,
     carryForwardAllYesterday,
     selectedDate,
@@ -30,28 +33,17 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
     triggerLoader
   } = useHisab();
 
-  const [isAdding, setIsAdding] = useState(false);
+  const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
   const [entryMode, setEntryMode] = useState('direct'); // 'direct' (Aaj ka balance) or 'detailed'
-  const [newAccName, setNewAccName] = useState('');
-  const [newAccType, setNewAccType] = useState('BANK');
-  const [newAccOpening, setNewAccOpening] = useState('');
+
+  const [cashCalcModal, setCashCalcModal] = useState({
+    isOpen: false,
+    accountId: null,
+    accountName: '',
+    initialAmount: 0
+  });
 
   const yesterdayDate = getPreviousDateString ? getPreviousDateString(selectedDate) : 'कल';
-
-  const handleAddSubmit = (e) => {
-    e.preventDefault();
-    if (!newAccName) return;
-    addBankAccount({
-      name: newAccName,
-      type: newAccType,
-      opening: Number(newAccOpening || 0),
-      deposits: 0,
-      withdrawals: 0
-    });
-    setNewAccName('');
-    setNewAccOpening('');
-    setIsAdding(false);
-  };
 
   const handleKeyDown = (e, index) => {
     if (e.key === 'Enter' || e.key === 'ArrowDown') {
@@ -118,11 +110,31 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
           {/* 1-Click Carry Forward Button */}
           <button
             onClick={carryForwardAllYesterday}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-bold transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-bold transition-all shadow-sm cursor-pointer"
             title="कल का क्लोजिंग बैलेंस आज के ओपनिंग में कॉपी करें"
           >
             <Zap className="w-4 h-4 text-sky-400" />
             <span>⚡ कल का बैलेंस लाएं ({yesterdayDate})</span>
+          </button>
+
+          {/* Cash Denomination Calculator Toolbar Button */}
+          <button
+            type="button"
+            onClick={() => {
+              const cashAcc = activeBankAccounts.find(a => a.type === 'CASH') || activeBankAccounts[0];
+              const curClosing = (Number(cashAcc?.opening) || 0) + (Number(cashAcc?.deposits) || 0) - (Number(cashAcc?.withdrawals) || 0);
+              setCashCalcModal({
+                isOpen: true,
+                accountId: cashAcc?.id,
+                accountName: cashAcc?.name || 'Cash in Hand (गल्ला कैश)',
+                initialAmount: curClosing
+              });
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-bold transition-all shadow-sm cursor-pointer"
+            title="गल्ले के 500, 200, 100 आदि नोट गिनें"
+          >
+            <Calculator className="w-4 h-4 text-emerald-400" />
+            <span>💵 नोट कैलकुलेटर (गिनें)</span>
           </button>
 
           {/* Total Badge */}
@@ -133,51 +145,17 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
             </span>
           </div>
 
-          {/* Add Account Button */}
+          {/* Add Account Button (Modal Trigger) */}
           <button
-            onClick={() => setIsAdding(!isAdding)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md transition-colors"
+            onClick={() => setIsAddAccountModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md transition-all cursor-pointer"
+            title="नया बैंक खाता या गल्ला रजिस्टर जोड़ें"
           >
             <Plus className="w-4 h-4" />
-            <span>{isAdding ? 'Close' : '+ Add Account'}</span>
+            <span>+ Add Account</span>
           </button>
         </div>
       </div>
-
-      {/* Inline Add Account Form */}
-      {isAdding && (
-        <form onSubmit={handleAddSubmit} className="p-4 rounded-xl bg-slate-950 border border-sky-500/30 grid grid-cols-1 sm:grid-cols-4 gap-3 animate-fadeIn">
-          <input
-            type="text"
-            required
-            placeholder="Account / Bank Name (e.g. SBI Main Current)"
-            value={newAccName}
-            onChange={(e) => setNewAccName(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
-          />
-          <select
-            value={newAccType}
-            onChange={(e) => setNewAccType(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500"
-          >
-            <option value="BANK">Bank Account (बैंक)</option>
-            <option value="CASH">Physical Cash Drawer (गल्ला कैश)</option>
-          </select>
-          <input
-            type="number"
-            placeholder="Opening Balance (₹)"
-            value={newAccOpening}
-            onChange={(e) => setNewAccOpening(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500 font-mono"
-          />
-          <button
-            type="submit"
-            className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-lg py-2 transition-colors"
-          >
-            Save Account
-          </button>
-        </form>
-      )}
 
       {/* Bank Accounts Table */}
       <div className="overflow-x-auto">
@@ -255,6 +233,24 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
                             onChange={(e) => setBankAccountDirectTodayBalance(acc.id, e.target.value)}
                             className="w-32 bg-sky-950/40 border border-sky-500/50 hover:border-sky-400 focus:border-sky-400 focus:bg-sky-950/80 rounded-lg px-2.5 py-1.5 text-right font-mono font-black text-sky-300 text-sm focus:outline-none transition-all shadow-inner ring-0 focus:ring-2 focus:ring-sky-500/50"
                           />
+                          {isCash && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setCashCalcModal({
+                                  isOpen: true,
+                                  accountId: acc.id,
+                                  accountName: acc.name,
+                                  initialAmount: closing
+                                });
+                              }}
+                              className="px-2 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/35 text-emerald-300 hover:text-white border border-emerald-500/40 transition-all hover:scale-105 flex items-center gap-1 shadow-sm cursor-pointer"
+                              title="नोट गिनें / 500, 200, 100 आदि कैलकुलेटर"
+                            >
+                              <Calculator className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-[10px] font-bold hidden xl:inline">नोट गिनें</span>
+                            </button>
+                          )}
                         </div>
                       </td>
 
@@ -390,6 +386,28 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
           </button>
         </div>
       </div>
+
+      {/* Cash Denomination Calculator Modal */}
+      {cashCalcModal.isOpen && (
+        <CashDenominationModal
+          isOpen={cashCalcModal.isOpen}
+          onClose={() => setCashCalcModal(prev => ({ ...prev, isOpen: false }))}
+          targetAccountName={cashCalcModal.accountName}
+          initialAmount={cashCalcModal.initialAmount}
+          onApplyCash={(totalCalculated) => {
+            if (cashCalcModal.accountId) {
+              setBankAccountDirectTodayBalance(cashCalcModal.accountId, totalCalculated);
+              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} गल्ला कैश में सेट कर दिया गया!`, 'success');
+            }
+          }}
+        />
+      )}
+
+      {/* 🔒 Add Bank Account Modal (With PIN Security) */}
+      <AddBankAccountModal
+        isOpen={isAddAccountModalOpen}
+        onClose={() => setIsAddAccountModalOpen(false)}
+      />
     </div>
   );
 };

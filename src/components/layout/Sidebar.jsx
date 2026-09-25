@@ -14,11 +14,14 @@ import {
   Sparkles,
   Building2,
   Layers,
-  X
+  X,
+  Calculator
 } from 'lucide-react';
 import { useHisab } from '../../context/HisabContext';
+import { formatINR } from '../../utils/formatters';
 import { ResetModal } from '../common/ResetModal';
 import { ThemeToggle } from '../common/ThemeToggle';
+import { CashDenominationModal } from '../common/CashDenominationModal';
 
 export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
   const {
@@ -26,10 +29,14 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
     branches,
     selectedBranchId,
     setSelectedBranchId,
-    isAllShops
+    isAllShops,
+    activeBankAccounts,
+    setBankAccountDirectTodayBalance,
+    showToast
   } = useHisab();
 
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isCashCalcModalOpen, setIsCashCalcModalOpen] = useState(false);
 
   const navItems = [
     {
@@ -216,6 +223,15 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
             </p>
           </div>
 
+          {/* 💵 Cash Denomination Calculator */}
+          <button
+            onClick={() => setIsCashCalcModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-emerald-200 text-xs font-bold border border-emerald-500/30 transition-all cursor-pointer shadow-sm"
+          >
+            <Calculator className="w-3.5 h-3.5 text-emerald-400" />
+            <span>💵 नोट कैलकुलेटर (Cash Count)</span>
+          </button>
+
           <button
             onClick={() => setIsResetModalOpen(true)}
             className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 text-xs font-bold border border-rose-500/30 transition-all cursor-pointer shadow-sm"
@@ -231,6 +247,22 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
         isOpen={isResetModalOpen}
         onClose={() => setIsResetModalOpen(false)}
       />
+
+      {/* 💵 Cash Denomination Modal */}
+      {isCashCalcModalOpen && (
+        <CashDenominationModal
+          isOpen={isCashCalcModalOpen}
+          onClose={() => setIsCashCalcModalOpen(false)}
+          targetAccountName="Cash in Hand (गल्ला कैश)"
+          onApplyCash={(totalCalculated) => {
+            const cashAcc = activeBankAccounts.find(a => a.type === 'CASH') || activeBankAccounts[0];
+            if (cashAcc) {
+              setBankAccountDirectTodayBalance(cashAcc.id, totalCalculated);
+              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} गल्ला कैश में सेट कर दिया गया!`, 'success');
+            }
+          }}
+        />
+      )}
     </>
   );
 };

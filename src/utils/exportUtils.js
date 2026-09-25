@@ -6,8 +6,8 @@ import { formatINR, formatDate, formatTime } from './formatters';
 
 export const exportTransactionsToCSV = (transactions, portalsMap, filename = 'Daily_Hisab_Transactions.csv') => {
   if (!transactions || transactions.length === 0) {
-    alert('No transactions to export.');
-    return;
+    console.warn('No transactions to export.');
+    return false;
   }
 
   const headers = ['ID', 'Time', 'Type', 'Customer Name', 'Phone', 'Portal', 'Amount (Rs)', 'Commission (Rs)', 'Remark'];
@@ -38,8 +38,8 @@ export const exportTransactionsToCSV = (transactions, portalsMap, filename = 'Da
 
 export const exportCustomerLedgerToCSV = (customers, filename = 'Customer_Khata_Ledger.csv') => {
   if (!customers || customers.length === 0) {
-    alert('No customers to export.');
-    return;
+    console.warn('No customers to export.');
+    return false;
   }
 
   const headers = ['Customer ID', 'Name', 'Phone', 'Address / Reference', 'Total Jama (Rs)', 'Total Liya (Rs)', 'Net Balance (Rs)', 'Status'];

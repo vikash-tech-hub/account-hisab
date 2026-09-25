@@ -3,7 +3,7 @@ import { Modal } from '../common/Modal';
 import { useHisab } from '../../context/HisabContext';
 
 export const AddCustomerModal = ({ isOpen, onClose }) => {
-  const { addCustomer } = useHisab();
+  const { addCustomer, showToast } = useHisab();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -17,11 +17,12 @@ export const AddCustomerModal = ({ isOpen, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name) {
-      alert('Please enter the customer name.');
+      if (showToast) showToast('⚠️ कृपया ग्राहक का नाम दर्ज करें', 'error');
       return;
     }
 
     addCustomer(formData);
+    if (showToast) showToast(`✅ ग्राहक "${formData.name}" जुड़ गया!`, 'success');
     onClose();
   };
 

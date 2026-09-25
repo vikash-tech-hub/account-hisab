@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 export const CustomerDetailModal = ({ customer, isOpen, onClose, onQuickTransaction }) => {
-  const { allTransactions, activeBranch, addTransaction } = useHisab();
+  const { allTransactions, activeBranch, addTransaction, showToast } = useHisab();
   const [quickAmount, setQuickAmount] = useState('');
   const [quickRemark, setQuickRemark] = useState('');
 
@@ -33,7 +33,7 @@ export const CustomerDetailModal = ({ customer, isOpen, onClose, onQuickTransact
   const handleQuickEntry = (type) => {
     const amount = Number(quickAmount);
     if (!amount || amount <= 0) {
-      alert('Please enter a valid amount.');
+      if (showToast) showToast('⚠️ कृपया सही रकम भरें', 'error');
       return;
     }
 

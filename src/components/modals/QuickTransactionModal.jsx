@@ -56,7 +56,7 @@ const TRANSACTION_TYPES = [
 ];
 
 export const QuickTransactionModal = ({ isOpen, onClose, initialData = {} }) => {
-  const { activePortals, customers, addTransaction } = useHisab();
+  const { activePortals, customers, addTransaction, showToast } = useHisab();
 
   const [type, setType] = useState('DMT');
   const [portalId, setPortalId] = useState('');
@@ -113,7 +113,7 @@ export const QuickTransactionModal = ({ isOpen, onClose, initialData = {} }) => 
     e.preventDefault();
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) {
-      alert('Please enter a valid amount.');
+      if (showToast) showToast('⚠️ कृपया सही रकम दर्ज करें', 'error');
       return;
     }
 

@@ -4,6 +4,7 @@ import { formatINR } from '../../utils/formatters';
 import { AddBranchModal } from '../branches/AddBranchModal';
 import { ResetModal } from '../common/ResetModal';
 import { ThemeToggle } from '../common/ThemeToggle';
+import { CashDenominationModal } from '../common/CashDenominationModal';
 import {
   Building2,
   Calendar,
@@ -14,7 +15,8 @@ import {
   Layers,
   Sparkles,
   Store,
-  RotateCcw
+  RotateCcw,
+  Calculator
 } from 'lucide-react';
 
 export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
@@ -28,12 +30,16 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
     setSelectedDate,
     totalPortalsBalance,
     totalBankBalance,
-    netTotalCapital
+    netTotalCapital,
+    activeBankAccounts,
+    setBankAccountDirectTodayBalance,
+    showToast
   } = useHisab();
 
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
   const [isAddBranchModalOpen, setIsAddBranchModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isCashCalcModalOpen, setIsCashCalcModalOpen] = useState(false);
 
   return (
     <>
@@ -240,6 +246,16 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
                 />
               </div>
 
+              {/* 💵 Cash Calculator Button */}
+              <button
+                onClick={() => setIsCashCalcModalOpen(true)}
+                className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 hover:text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+                title="गल्ले के 500, 200, 100 आदि नोट गिनें"
+              >
+                <Calculator className="w-3.5 h-3.5 text-emerald-400" />
+                <span>💵 नोट गिनें</span>
+              </button>
+
               <button
                 onClick={onOpenPrintModal}
                 className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer"
@@ -264,6 +280,22 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
         isOpen={isResetModalOpen}
         onClose={() => setIsResetModalOpen(false)}
       />
+
+      {/* 💵 Global Cash Calculator Modal */}
+      {isCashCalcModalOpen && (
+        <CashDenominationModal
+          isOpen={isCashCalcModalOpen}
+          onClose={() => setIsCashCalcModalOpen(false)}
+          targetAccountName="Cash in Hand (गल्ला कैश)"
+          onApplyCash={(totalCalculated) => {
+            const cashAcc = activeBankAccounts.find(a => a.type === 'CASH') || activeBankAccounts[0];
+            if (cashAcc) {
+              setBankAccountDirectTodayBalance(cashAcc.id, totalCalculated);
+              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} गल्ला कैश में सेट कर दिया गया!`, 'success');
+            }
+          }}
+        />
+      )}
     </>
   );
 };

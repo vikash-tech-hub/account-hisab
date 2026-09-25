@@ -280,13 +280,45 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white dark:bg-slate-950/90 px-4 sm:px-6 py-3 rounded-xl border border-indigo-200 dark:border-indigo-500/40 shrink-0 shadow-sm dark:shadow-lg">
-          <div>
-            <div className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">
-              {isDaily ? 'Daily Net Capital' : 'All-Time Net Capital'}
+        {/* Dual Net Capital Displays (Daily + All-Time Side-by-Side) */}
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+          {/* Card 1: Daily Net Capital */}
+          <div
+            onClick={() => setSummaryViewMode('daily')}
+            className={`px-3.5 sm:px-4 py-2.5 rounded-xl border transition-all cursor-pointer shadow-sm ${
+              isDaily
+                ? 'bg-indigo-600/10 dark:bg-slate-950/95 border-indigo-500 ring-2 ring-indigo-500/50 shadow-indigo-500/10'
+                : 'bg-white/60 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 opacity-75 hover:opacity-100 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <div className={`text-[10px] uppercase font-bold ${isDaily ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400'}`}>
+                आज की शुद्ध पूँजी (Daily)
+              </div>
+              {isDaily && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />}
             </div>
-            <div className="text-xl sm:text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
-              {formatINR(currentNetCapital)}
+            <div className="text-lg sm:text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {formatINR(netTotalCapital)}
+            </div>
+          </div>
+
+          {/* Card 2: All-Time Net Capital */}
+          <div
+            onClick={() => setSummaryViewMode('all_time')}
+            className={`px-3.5 sm:px-4 py-2.5 rounded-xl border transition-all cursor-pointer shadow-sm ${
+              !isDaily
+                ? 'bg-emerald-600/10 dark:bg-slate-950/95 border-emerald-500 ring-2 ring-emerald-500/50 shadow-emerald-500/10'
+                : 'bg-white/60 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 opacity-75 hover:opacity-100 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <div className={`text-[10px] uppercase font-bold ${!isDaily ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}`}>
+                अब तक कुल (All-Time)
+              </div>
+              {!isDaily && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+            </div>
+            <div className="text-lg sm:text-xl font-black font-mono text-cyan-600 dark:text-cyan-400 mt-0.5">
+              {formatINR(allTimeNetTotalCapital)}
             </div>
           </div>
         </div>

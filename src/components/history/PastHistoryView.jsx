@@ -4,14 +4,7 @@ import { formatINR, formatDate, formatDateFull, getTodayDateString, getOffsetDat
 import { History, Calendar, ArrowRight, Eye, Sparkles } from 'lucide-react';
 
 export const PastHistoryView = ({ onSelectDate }) => {
-  const { availableHistoryDates, setSelectedDate, selectedDate, activeBranch } = useHisab();
-
-  // Preset summary calculations for known history dates
-  const historySummaries = {
-    [getTodayDateString()]: { portals: 124700, accounts: 184000, jama: 205000, liya: 75500, net: 438200 },
-    [getOffsetDateString(-1)]: { portals: 133200, accounts: 175000, jama: 93000, liya: 57000, net: 382200 },
-    [getOffsetDateString(-2)]: { portals: 134700, accounts: 153000, jama: 80000, liya: 15000, net: 352700 }
-  };
+  const { availableHistoryDates, setSelectedDate, selectedDate, activeBranch, getDateSummary } = useHisab();
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4">
@@ -49,7 +42,7 @@ export const PastHistoryView = ({ onSelectDate }) => {
           <tbody className="divide-y divide-slate-800/60">
             {availableHistoryDates.map((dateStr) => {
               const isSelected = selectedDate === dateStr;
-              const summary = historySummaries[dateStr] || { portals: 120000, accounts: 150000, jama: 50000, liya: 30000, net: 350000 };
+              const summary = getDateSummary ? getDateSummary(dateStr) : { portals: 0, accounts: 0, jama: 0, liya: 0, net: 0 };
 
               return (
                 <tr

@@ -70,11 +70,6 @@ export const HisabProvider = ({ children }) => {
   });
 
   const [selectedDate, setSelectedDate] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SELECTED_DATE);
-    // If the saved date was the legacy hardcoded date (2026-09-16), reset to current today
-    if (saved && saved !== '2026-09-16') {
-      return saved;
-    }
     return getTodayDateString();
   });
 
@@ -455,6 +450,51 @@ export const HisabProvider = ({ children }) => {
   const allTimeNetTotalCapital = useMemo(() => {
     return totalPortalsBalance + totalBankBalance + allTimeLiyaAmount - allTimeJamaAmount;
   }, [totalPortalsBalance, totalBankBalance, allTimeLiyaAmount, allTimeJamaAmount]);
+
+  // Real Historical Date Summary Calculator
+  const getDateSummary = (dateStr) => {
+    let portalsSum = 0;
+    if (isAllShops) {
+      branches.forEach(b => {
+        const key = `${b.id}_${dateStr}`;
+        const pList = dailyPortals[key] || [];
+        portalsSum += pList.reduce((s, p) => s + ((Number(p.opening) || 0) + (Number(p.inAmount) || 0) - (Number(p.outAmount) || 0)), 0);
+      });
+    } else {
+      const key = `${selectedBranchId}_${dateStr}`;
+      const pList = dailyPortals[key] || [];
+      portalsSum = pList.reduce((s, p) => s + ((Number(p.opening) || 0) + (Number(p.inAmount) || 0) - (Number(p.outAmount) || 0)), 0);
+    }
+
+    let accSum = 0;
+    if (isAllShops) {
+      branches.forEach(b => {
+        const key = `${b.id}_${dateStr}`;
+        const aList = dailyAccounts[key] || [];
+        accSum += aList.reduce((s, a) => s + ((Number(a.opening) || 0) + (Number(a.deposits) || 0) - (Number(a.withdrawals) || 0)), 0);
+      });
+    } else {
+      const key = `${selectedBranchId}_${dateStr}`;
+      const aList = dailyAccounts[key] || [];
+      accSum = aList.reduce((s, a) => s + ((Number(a.opening) || 0) + (Number(a.deposits) || 0) - (Number(a.withdrawals) || 0)), 0);
+    }
+
+    const jList = jamaRecords.filter(r => (isAllShops || r.branchId === selectedBranchId) && r.date === dateStr);
+    const jamaSum = jList.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+
+    const lList = liyaRecords.filter(r => (isAllShops || r.branchId === selectedBranchId) && r.date === dateStr);
+    const liyaSum = lList.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+
+    const net = portalsSum + accSum + liyaSum - jamaSum;
+
+    return {
+      portals: portalsSum,
+      accounts: accSum,
+      jama: jamaSum,
+      liya: liyaSum,
+      net
+    };
+  };
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
@@ -1091,6 +1131,7 @@ export const HisabProvider = ({ children }) => {
         clearAllDataToFresh,
         resetToDemoData,
         resetAllData,
+        getDateSummary,
         theme,
         setTheme,
         toggleTheme

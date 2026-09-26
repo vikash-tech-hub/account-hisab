@@ -12,7 +12,7 @@ export const ThagdaLoader = ({
   const isDark = theme !== 'light';
 
   const [progress, setProgress] = useState(0);
-  const [statusText, setStatusText] = useState(subtitle || '4-Pillars Daily Hisab लोड हो रहा है...');
+  const [statusText, setStatusText] = useState(subtitle || 'Loading daily accounts...');
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
@@ -26,13 +26,13 @@ export const ThagdaLoader = ({
         setStatusText(subtitle);
       } else {
         if (pct < 30) {
-          setStatusText('📱 10 पोर्टल बैलेंस व वॉलेट लोड हो रहे हैं...');
+          setStatusText('Loading portal balances...');
         } else if (pct < 60) {
-          setStatusText('🏦 बैंक खाते व गल्ला कैश सुरक्षित हो रहा है...');
+          setStatusText('Saving bank accounts and cash...');
         } else if (pct < 85) {
-          setStatusText('👥 ग्राहक खाता बही (Jama/Liya) सिंक हो रही है...');
+          setStatusText('Syncing the customer ledger...');
         } else {
-          setStatusText('✨ माँ वैष्णो इंटरप्राइजेज हिसाब पोर्टल तैयार है!');
+          setStatusText('Maa Vaishno Enterprises accounts are ready.');
         }
       }
 
@@ -101,11 +101,11 @@ export const ThagdaLoader = ({
             Maa Vaishno Enterprises
           </span>
           <span className="bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-emerald-500/30">
-            4-Pillars Hisab
+            Daily accounts
           </span>
         </div>
         <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-          Portals • Bank Accounts • Jama • Liya • Other Income
+          Portals • Bank accounts • Deposits • Withdrawals • Other income
         </p>
       </div>
 

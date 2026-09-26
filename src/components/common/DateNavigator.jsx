@@ -29,34 +29,17 @@ export const DateNavigator = () => {
   const isDayBefore = selectedDate === dayBeforeStr;
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-      
-      {/* Left: Active Date & Status */}
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <div className="p-3 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 shrink-0">
+        <div className="p-2.5 rounded-xl bg-indigo-600/15 text-indigo-300 border border-indigo-500/20 shrink-0">
           <Calendar className="w-5 h-5" />
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Viewing Daily Hisab For:
-            </span>
-            {isToday ? (
-              <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                Today (आज)
-              </span>
-            ) : isYesterday ? (
-              <span className="bg-amber-500/20 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
-                Yesterday (पिछला दिन)
-              </span>
-            ) : (
-              <span className="bg-sky-500/20 text-sky-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-sky-500/30">
-                Past Record (पिछला इतिहास)
-              </span>
-            )}
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            {isToday ? 'Today' : isYesterday ? 'Yesterday' : 'Selected day'}
           </div>
-          <div className="text-lg font-black text-white mt-0.5">
-            {formatDate(selectedDate)} <span className="text-xs font-normal text-slate-400">({formatDateFull(selectedDate)})</span>
+          <div className="text-lg font-bold text-white">
+            {formatDateFull(selectedDate)}
           </div>
         </div>
       </div>
@@ -122,10 +105,10 @@ export const DateNavigator = () => {
         <button
           onClick={carryForwardAllYesterday}
           className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm shrink-0 whitespace-nowrap"
-          title="कल का क्लोजिंग बैलेंस आज के ओपनिंग में लोड करें"
+          title="Copy yesterday's closing into today's opening"
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>⚡ कल का बैलेंस लाएं</span>
+          <span>Use yesterday's balance</span>
         </button>
 
         {/* Custom Calendar Date Input */}

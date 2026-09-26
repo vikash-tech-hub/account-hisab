@@ -61,16 +61,11 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 font-black text-sm tracking-tighter">
                   MVE
                 </div>
-                <div className="hidden sm:block">
-                  <div className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5">
+                <div className="hidden md:block">
+                  <div className="text-sm font-bold text-white tracking-tight">
                     Maa Vaishno Enterprises
-                    <span className="text-[10px] uppercase tracking-wider bg-emerald-500/20 text-emerald-300 font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">
-                      4-Pillars
-                    </span>
                   </div>
-                  <div className="text-xs text-slate-400">
-                    Portals • Bank Accounts • Jama • Liya
-                  </div>
+                  <div className="text-[11px] text-slate-400">Daily accounts</div>
                 </div>
               </div>
 
@@ -130,7 +125,7 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
                             </span>
                           </div>
                           <div className="text-[11px] text-slate-400 truncate">
-                            सभी दुकानों का कुल हिसाब ({branches.length} Shops)
+                            Combined books for all shops ({branches.length} shops)
                           </div>
                         </div>
                       </button>
@@ -176,7 +171,7 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
                           className="w-full py-2 px-3 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold flex items-center justify-center gap-2 border border-indigo-500/30 transition-all"
                         >
                           <Plus className="w-3.5 h-3.5" />
-                          <span>+ Create New Shop (नई दुकान जोड़ें)</span>
+                          <span>+ Create new shop</span>
                         </button>
                       </div>
                     </div>
@@ -204,7 +199,7 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
               </div>
               <div className="h-4 w-px bg-slate-800" />
               <div className="text-xs">
-                <span className="text-slate-400">Net Total Hisab: </span>
+                <span className="text-slate-400">Net capital: </span>
                 <span className="font-mono font-extrabold text-emerald-400">
                   {formatINR(netTotalCapital)}
                 </span>
@@ -219,18 +214,18 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
               {/* 🔄 Reset & Fresh Start Button (Exact location of red box) */}
               <button
                 onClick={() => setIsResetModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 hover:text-rose-200 text-xs font-bold transition-all shadow-sm cursor-pointer"
-                title="नया फ्रेश हिसाब शुरू करें या डेटा रीसेट करें"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+                title="Start fresh or reset data"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
-                <span className="hidden sm:inline">🔄 रीसेट (Reset)</span>
-                <span className="sm:hidden">रीसेट</span>
+                <span className="hidden sm:inline">Reset</span>
+                <span className="sm:hidden">Reset</span>
               </button>
 
               <button
                 onClick={() => setIsAddBranchModalOpen(true)}
                 className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-indigo-300 text-xs font-semibold hover:text-white transition-all cursor-pointer"
-                title="नई दुकान / नया खाता प्रोफाइल जोड़ें"
+                title="Add a new shop"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Add Shop</span>
@@ -250,10 +245,10 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
               <button
                 onClick={() => setIsCashCalcModalOpen(true)}
                 className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 hover:text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
-                title="गल्ले के 500, 200, 100 आदि नोट गिनें"
+                title="Count 500, 200, 100, and other notes"
               >
                 <Calculator className="w-3.5 h-3.5 text-emerald-400" />
-                <span>💵 नोट गिनें</span>
+                <span>Count notes</span>
               </button>
 
               <button
@@ -286,12 +281,12 @@ export const Navbar = ({ onOpenPrintModal, onToggleSidebar }) => {
         <CashDenominationModal
           isOpen={isCashCalcModalOpen}
           onClose={() => setIsCashCalcModalOpen(false)}
-          targetAccountName="Cash in Hand (गल्ला कैश)"
+          targetAccountName="Cash in Hand"
           onApplyCash={(totalCalculated) => {
             const cashAcc = activeBankAccounts.find(a => a.type === 'CASH') || activeBankAccounts[0];
             if (cashAcc) {
               setBankAccountDirectTodayBalance(cashAcc.id, totalCalculated);
-              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} गल्ला कैश में सेट कर दिया गया!`, 'success');
+              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} set as cash in hand.`, 'success');
             }
           }}
         />

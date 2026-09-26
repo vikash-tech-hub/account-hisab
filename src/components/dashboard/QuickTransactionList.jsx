@@ -56,14 +56,14 @@ export const QuickTransactionList = ({ onOpenTransactionModal }) => {
         return (
           <Badge variant="success" size="xs">
             <ArrowDownLeft className="w-3 h-3" />
-            Cash Deposit (Jama)
+            Cash deposit
           </Badge>
         );
       case 'LIYA':
         return (
           <Badge variant="danger" size="xs">
             <ArrowUpRight className="w-3 h-3" />
-            Cash Withdrawal (Liya)
+            Cash withdrawal
           </Badge>
         );
       case 'PORTAL_LOAD':
@@ -126,8 +126,8 @@ export const QuickTransactionList = ({ onOpenTransactionModal }) => {
           { id: 'ALL', label: 'All Entries' },
           { id: 'DMT', label: 'DMT Transfers' },
           { id: 'AEPS', label: 'AEPS Withdrawals' },
-          { id: 'JAMA', label: 'Deposits (Jama)' },
-          { id: 'LIYA', label: 'Withdrawals (Liya)' },
+          { id: 'JAMA', label: 'Deposits' },
+          { id: 'LIYA', label: 'Withdrawals' },
           { id: 'PORTAL_LOAD', label: 'Wallet Top-ups' }
         ].map((tab) => (
           <button

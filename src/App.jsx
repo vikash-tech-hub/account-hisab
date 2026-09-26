@@ -33,14 +33,14 @@ const MainContent = () => {
   }, [activeTab]);
 
   const quickTabs = [
-    { id: 'portals', label: '1. 📱 10 पोर्टल (Portals)', color: 'bg-amber-600 text-white shadow-lg shadow-amber-600/30 ring-2 ring-amber-400/50' },
-    { id: 'accounts', label: '2. 🏦 बैंक व गल्ला (Bank/Cash)', color: 'bg-sky-600 text-white shadow-lg shadow-sky-600/30 ring-2 ring-sky-400/50' },
-    { id: 'people', label: '3. 👥 ग्राहक खाता (Jama/Liya)', color: 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400/50' },
-    { id: 'incomes', label: '4. 💰 अन्य कमाई (+Income)', color: 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 ring-2 ring-teal-400/50' },
-    { id: 'expenses', label: '5. ☕ दुकान खर्च (-Kharcha)', color: 'bg-pink-600 text-white shadow-lg shadow-pink-600/30 ring-2 ring-pink-400/50' },
-    { id: 'profit', label: '6. 📊 मुनाफ़ा रिपोर्ट (Profit)', color: 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 ring-2 ring-purple-400/50' },
-    { id: 'history', label: '7. 📜 इतिहास (Past Data)', color: 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-2 ring-blue-400/50' },
-    { id: 'all', label: '🌟 All-in-1 (सब एक साथ)', color: 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400/50' }
+    { id: 'portals', label: '1. Portals', color: 'bg-amber-600 text-white shadow-lg shadow-amber-600/30 ring-2 ring-amber-400/50' },
+    { id: 'accounts', label: '2. Bank / Cash', color: 'bg-sky-600 text-white shadow-lg shadow-sky-600/30 ring-2 ring-sky-400/50' },
+    { id: 'people', label: '3. Customer Accounts', color: 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400/50' },
+    { id: 'incomes', label: '4. Other Income', color: 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 ring-2 ring-teal-400/50' },
+    { id: 'expenses', label: '5. Shop Expenses', color: 'bg-pink-600 text-white shadow-lg shadow-pink-600/30 ring-2 ring-pink-400/50' },
+    { id: 'profit', label: '6. Profit Report', color: 'bg-purple-600 text-white shadow-lg shadow-purple-600/30 ring-2 ring-purple-400/50' },
+    { id: 'history', label: '7. History', color: 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-2 ring-blue-400/50' },
+    { id: 'all', label: 'Dashboard', color: 'bg-indigo-600 text-white' }
   ];
 
   return (
@@ -72,17 +72,10 @@ const MainContent = () => {
         {/* Main Content Area - Full width with balanced spacing */}
         <main className="flex-1 lg:ml-64 p-3 sm:p-4 lg:p-5 w-full space-y-4 min-w-0">
           
-          {/* Interactive Date & History Switcher (Today, Yesterday, Custom Date) */}
           <DateNavigator />
 
-          {/* 6 Core Summary Cards & Net Capital Banner */}
-          <HisabSummaryOverview
-            activeSection={activeTab}
-            setActiveSection={(tab) => setActiveTab(tab)}
-          />
-
           {/* 🌟 User-Friendly Interactive Section Switcher & Quick Actions Bar */}
-          <div className="sticky top-16 z-30 bg-slate-900/95 backdrop-blur-md p-2 rounded-2xl border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+          <div className="lg:hidden sticky top-16 z-30 bg-slate-900/95 backdrop-blur-md p-2 rounded-2xl border border-slate-800 flex flex-col gap-2.5">
             {/* Filter Tabs Scrollable */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
               {quickTabs.map((tab) => {
@@ -91,10 +84,10 @@ const MainContent = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shadow-sm ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                       isActive
-                        ? tab.color
-                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white bg-white dark:bg-slate-950/70 border border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-slate-300 bg-slate-950 border border-slate-800'
                     }`}
                   >
                     {tab.label}
@@ -109,43 +102,18 @@ const MainContent = () => {
                 onClick={() => setIsPrintModalOpen(true)}
                 className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <span>🖨️ पर्ची प्रिंट</span>
+                <span>Print Slip</span>
               </button>
             </div>
           </div>
 
           {/* Tab Views */}
           {activeTab === 'all' && (
-            <div className="space-y-6 animate-fadeIn">
-              {/* Pillar 1: Portals */}
-              <PortalsPillar onNext={() => setActiveTab('accounts')} />
-
-              {/* Pillar 2: Bank Accounts & Cash */}
-              <BankAccountsPillar
-                onNext={() => setActiveTab('people')}
-                onPrev={() => setActiveTab('portals')}
+            <div className="animate-fadeIn">
+              <HisabSummaryOverview
+                activeSection={activeTab}
+                setActiveSection={(tab) => setActiveTab(tab)}
               />
-
-              {/* Pillar 3 & 4: Unified People & Party Master (Jama & Liya) */}
-              <PeopleMasterPillar
-                onNext={() => setActiveTab('incomes')}
-                onPrev={() => setActiveTab('accounts')}
-              />
-
-              {/* Other Income & Service Fees (AEPS, DMT, PF, Photo Copy, etc.) */}
-              <IncomeTracker
-                onNext={() => setActiveTab('expenses')}
-                onPrev={() => setActiveTab('people')}
-              />
-
-              {/* Daily Shop Expenses Tracker */}
-              <ExpenseTracker
-                onNext={() => setActiveTab('profit')}
-                onPrev={() => setActiveTab('incomes')}
-              />
-
-              {/* Profit & Earnings Chart on Dashboard */}
-              <ProfitChartSection />
             </div>
           )}
 

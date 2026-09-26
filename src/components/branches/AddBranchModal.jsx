@@ -49,7 +49,7 @@ export const AddBranchModal = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 className="text-base font-bold text-white">Create New Shop / Branch</h3>
-              <p className="text-xs text-slate-400">नई दुकान/शाखा जोड़ें और अलग से हिसाब रखें</p>
+              <p className="text-xs text-slate-400">Add a shop or branch and keep its books separate</p>
             </div>
           </div>
           <button
@@ -65,7 +65,7 @@ export const AddBranchModal = ({ isOpen, onClose }) => {
           {/* Shop Name */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Shop / Branch Name <span className="text-rose-400">*</span> (दुकान का नाम)
+              Shop / branch name <span className="text-rose-400">*</span>
             </label>
             <div className="relative">
               <Building2 className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -84,7 +84,7 @@ export const AddBranchModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Branch Code (कोड)
+                Branch code
               </label>
               <input
                 type="text"
@@ -96,7 +96,7 @@ export const AddBranchModal = ({ isOpen, onClose }) => {
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Manager / Operator (संचालक)
+                Manager / operator
               </label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -115,7 +115,7 @@ export const AddBranchModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Phone Number (मोबाइल)
+                Phone number
               </label>
               <div className="relative">
                 <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -130,7 +130,7 @@ export const AddBranchModal = ({ isOpen, onClose }) => {
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Location / Address (पता)
+                Location / address
               </label>
               <div className="relative">
                 <MapPin className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -148,12 +148,12 @@ export const AddBranchModal = ({ isOpen, onClose }) => {
           {/* Initial Balances Section */}
           <div className="pt-2 border-t border-slate-800/80">
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-              <span>Opening Balances for New Shop (शुरुआती बैलेंस)</span>
+              <span>Opening balances for the new shop</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1">
-                  Cash in Hand / गल्ला (₹)
+                  Cash in hand (₹)
                 </label>
                 <div className="relative">
                   <Wallet className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -221,7 +221,7 @@ export const AddBranchModal = ({ isOpen, onClose }) => {
               className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all"
             >
               <Plus className="w-4 h-4" />
-              <span>Create Shop & Open Hisab</span>
+              <span>Create shop and open accounts</span>
             </button>
           </div>
         </form>

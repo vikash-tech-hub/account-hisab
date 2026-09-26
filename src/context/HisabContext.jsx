@@ -28,6 +28,37 @@ const STORAGE_KEYS = {
   THEME: 'jsk_v4_theme'
 };
 
+function toEnglishText(value) {
+  if (typeof value !== 'string' || !/[\u0900-\u097F]/.test(value)) return value;
+  return value
+    .replace(/\s*\(([^)]*[\u0900-\u097F][^)]*)\)/g, (_, inner) => {
+      const latin = inner.replace(/[\u0900-\u097F]+/g, '').replace(/\s+/g, ' ').trim();
+      return latin ? ` (${latin})` : '';
+    })
+    .replace(/[\u0900-\u097F]+/g, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
+function englishStored(value) {
+  if (typeof value === 'string') return toEnglishText(value);
+  if (Array.isArray(value)) return value.map(englishStored);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, englishStored(item)]));
+  }
+  return value;
+}
+
+function loadStored(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key);
+    if (!saved) return fallback;
+    return englishStored(JSON.parse(saved));
+  } catch {
+    return fallback;
+  }
+}
+
 export const HisabProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.THEME);
@@ -54,15 +85,9 @@ export const HisabProvider = ({ children }) => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const [branches, setBranches] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.BRANCHES);
-    return saved ? JSON.parse(saved) : INITIAL_BRANCHES;
-  });
+  const [branches, setBranches] = useState(() => loadStored(STORAGE_KEYS.BRANCHES, INITIAL_BRANCHES));
 
-  const [customers, setCustomers] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
-    return saved ? JSON.parse(saved) : INITIAL_CUSTOMERS;
-  });
+  const [customers, setCustomers] = useState(() => loadStored(STORAGE_KEYS.CUSTOMERS, INITIAL_CUSTOMERS));
 
   const [selectedBranchId, setSelectedBranchId] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SELECTED_BRANCH);
@@ -73,35 +98,17 @@ export const HisabProvider = ({ children }) => {
     return getTodayDateString();
   });
 
-  const [dailyPortals, setDailyPortals] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.DAILY_PORTALS);
-    return saved ? JSON.parse(saved) : INITIAL_DAILY_PORTALS;
-  });
+  const [dailyPortals, setDailyPortals] = useState(() => loadStored(STORAGE_KEYS.DAILY_PORTALS, INITIAL_DAILY_PORTALS));
 
-  const [dailyAccounts, setDailyAccounts] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.DAILY_ACCOUNTS);
-    return saved ? JSON.parse(saved) : INITIAL_DAILY_ACCOUNTS;
-  });
+  const [dailyAccounts, setDailyAccounts] = useState(() => loadStored(STORAGE_KEYS.DAILY_ACCOUNTS, INITIAL_DAILY_ACCOUNTS));
 
-  const [jamaRecords, setJamaRecords] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.JAMA);
-    return saved ? JSON.parse(saved) : INITIAL_JAMA_RECORDS;
-  });
+  const [jamaRecords, setJamaRecords] = useState(() => loadStored(STORAGE_KEYS.JAMA, INITIAL_JAMA_RECORDS));
 
-  const [liyaRecords, setLiyaRecords] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LIYA);
-    return saved ? JSON.parse(saved) : INITIAL_LIYA_RECORDS;
-  });
+  const [liyaRecords, setLiyaRecords] = useState(() => loadStored(STORAGE_KEYS.LIYA, INITIAL_LIYA_RECORDS));
 
-  const [expenses, setExpenses] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.EXPENSES);
-    return saved ? JSON.parse(saved) : INITIAL_EXPENSES;
-  });
+  const [expenses, setExpenses] = useState(() => loadStored(STORAGE_KEYS.EXPENSES, INITIAL_EXPENSES));
 
-  const [incomes, setIncomes] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.INCOMES);
-    return saved ? JSON.parse(saved) : INITIAL_INCOMES;
-  });
+  const [incomes, setIncomes] = useState(() => loadStored(STORAGE_KEYS.INCOMES, INITIAL_INCOMES));
 
   const [summaryViewMode, setSummaryViewMode] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SUMMARY_VIEW_MODE);
@@ -112,10 +119,10 @@ export const HisabProvider = ({ children }) => {
   const [loaderState, setLoaderState] = useState({
     isOpen: true,
     duration: 2600,
-    subtitle: '4-Pillars Daily Hisab लोड हो रहा है...'
+    subtitle: 'Loading daily accounts...'
   });
 
-  const triggerLoader = ({ duration = 2400, subtitle = 'डेटा सुरक्षित हो रहा है...', onFinish } = {}) => {
+  const triggerLoader = ({ duration = 2400, subtitle = 'Saving your data...', onFinish } = {}) => {
     setLoaderState({
       isOpen: true,
       duration,
@@ -187,9 +194,9 @@ export const HisabProvider = ({ children }) => {
     if (isAllShops) {
       return {
         id: 'ALL_SHOPS',
-        name: 'All Shops Combined (सभी दुकानें)',
+        name: 'All Shops Combined',
         code: `ALL (${branches.length} Shops)`,
-        manager: 'Consolidated Hisab'
+        manager: 'Consolidated accounts'
       };
     }
     return branches.find(b => b.id === selectedBranchId) || branches[0];
@@ -541,7 +548,7 @@ export const HisabProvider = ({ children }) => {
 
     // Default bank & cash accounts
     const defaultNewAccounts = [
-      { id: `acc-cash-${newBranchId}`, name: 'Cash in Hand (गल्ला कैश)', type: 'CASH', opening: Number(branchData.cashOpening || 30000), deposits: 0, withdrawals: 0, color: '#10b981' },
+      { id: `acc-cash-${newBranchId}`, name: 'Cash in Hand', type: 'CASH', opening: Number(branchData.cashOpening || 30000), deposits: 0, withdrawals: 0, color: '#10b981' },
       { id: `acc-bank-${newBranchId}`, name: 'Shop Primary Bank A/C', type: 'BANK', opening: Number(branchData.bankOpening || 50000), deposits: 0, withdrawals: 0, color: '#0284c7' }
     ];
 
@@ -654,7 +661,7 @@ export const HisabProvider = ({ children }) => {
     setCustomers(prev => prev.map(c => {
       if (c.id === id) {
         const nextState = !c.isPinned;
-        showToast(nextState ? `📌 ${c.name} को ऊपर पिन किया गया` : `Unpinned ${c.name}`, 'info');
+        showToast(nextState ? `Pinned ${c.name} to the top` : `Unpinned ${c.name}`, 'info');
         return { ...c, isPinned: nextState };
       }
       return c;
@@ -677,7 +684,7 @@ export const HisabProvider = ({ children }) => {
       setLiyaRecords(prev => prev.map(l => l.name.trim().toLowerCase() === oldName.trim().toLowerCase() ? { ...l, name: newName, phone: updates.phone || l.phone } : l));
     }
 
-    showToast(`✅ ${updates.name || 'पार्टी'} की जानकारी अपडेट हो गई!`);
+    showToast(`${updates.name || 'Party'} details updated.`);
   };
 
   const deleteCustomer = (id) => {
@@ -710,12 +717,12 @@ export const HisabProvider = ({ children }) => {
       }, ...prev]);
     }
 
-    showToast(`Added Jama of ₹${record.amount} for ${record.name}`);
+    showToast(`Added deposit of ₹${record.amount} for ${record.name}`);
   };
 
   const deleteJamaRecord = (id) => {
     setJamaRecords(prev => prev.filter(r => r.id !== id));
-    showToast('Jama entry removed', 'info');
+    showToast('Deposit removed', 'info');
   };
 
   // Add Liya (Withdrawal) with auto Master registry
@@ -743,12 +750,12 @@ export const HisabProvider = ({ children }) => {
       }, ...prev]);
     }
 
-    showToast(`Added Liya of ₹${record.amount} for ${record.name}`);
+    showToast(`Added withdrawal of ₹${record.amount} for ${record.name}`);
   };
 
   const deleteLiyaRecord = (id) => {
     setLiyaRecords(prev => prev.filter(r => r.id !== id));
-    showToast('Liya entry removed', 'info');
+    showToast('Withdrawal removed', 'info');
   };
 
   // Comprehensive Customer Ledger Master (All Jama + Liya unified for each person)
@@ -900,7 +907,7 @@ export const HisabProvider = ({ children }) => {
       updatedAny = true;
     }
 
-    showToast(`⚡ कल (${yesterdayDate}) का क्लोजिंग बैलेंस आज के ओपनिंग में सेट हो गया!`);
+    showToast(`Yesterday (${yesterdayDate}) closing is now today's opening.`);
   };
 
   // Direct Update Today's Portal Balance (Sets today's closing directly by calculating in/out)
@@ -1014,7 +1021,7 @@ export const HisabProvider = ({ children }) => {
 
     // Clean Bank Accounts with ₹0 opening balance
     const cleanAccounts = [
-      { id: 'acc-1', name: 'Cash in Hand (गल्ला कैश)', type: 'CASH', opening: 0, deposits: 0, withdrawals: 0, color: '#10b981' },
+      { id: 'acc-1', name: 'Cash in Hand', type: 'CASH', opening: 0, deposits: 0, withdrawals: 0, color: '#10b981' },
       { id: 'acc-2', name: 'Primary Current A/C', type: 'BANK', opening: 0, deposits: 0, withdrawals: 0, color: '#0284c7' },
       { id: 'acc-3', name: 'CSP Settlement A/C', type: 'BANK', opening: 0, deposits: 0, withdrawals: 0, color: '#4f46e5' },
       { id: 'acc-4', name: 'Savings A/C', type: 'BANK', opening: 0, deposits: 0, withdrawals: 0, color: '#dc2626' }
@@ -1057,7 +1064,7 @@ export const HisabProvider = ({ children }) => {
 
   const resetAllData = () => {
     resetToDemoData();
-    showToast('All Hisab data reset to default demo');
+    showToast('All account data reset to the demo');
   };
 
   return (

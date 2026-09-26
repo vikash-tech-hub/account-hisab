@@ -27,14 +27,14 @@ const TRANSACTION_TYPES = [
   },
   {
     id: 'JAMA',
-    label: 'Cash Deposit (Jama)',
+    label: 'Cash deposit',
     desc: 'Customer deposits cash into shop account',
     icon: ArrowDownLeft,
     color: 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
   },
   {
     id: 'LIYA',
-    label: 'Cash Withdrawal (Liya)',
+    label: 'Cash withdrawal',
     desc: 'Customer takes cash withdrawal or credit',
     icon: ArrowUpRight,
     color: 'border-rose-500 bg-rose-500/10 text-rose-400'
@@ -113,7 +113,7 @@ export const QuickTransactionModal = ({ isOpen, onClose, initialData = {} }) => 
     e.preventDefault();
     const numAmount = Number(amount);
     if (!numAmount || numAmount <= 0) {
-      if (showToast) showToast('⚠️ कृपया सही रकम दर्ज करें', 'error');
+      if (showToast) showToast('Enter a valid amount', 'error');
       return;
     }
 
@@ -257,7 +257,7 @@ export const QuickTransactionModal = ({ isOpen, onClose, initialData = {} }) => 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Select Customer Khata
+              Select customer
             </label>
             <select
               value={customerId}

@@ -40,7 +40,7 @@ export const LiyaPillar = () => {
           <div className="flex items-center gap-2">
             <ArrowUpRight className="w-5 h-5 text-rose-400" />
             <h3 className="text-lg font-bold text-white tracking-wide">
-              4. People's Withdrawals / Credit (लोगों ने कितना लिया - Liya)
+              4. Customer withdrawals
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -49,7 +49,7 @@ export const LiyaPillar = () => {
         </div>
 
         <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-right">
-          <span className="text-[10px] text-slate-400 font-bold uppercase block">Total People Liya</span>
+          <span className="text-[10px] text-slate-400 font-bold uppercase block">Total withdrawals</span>
           <span className="text-lg font-black font-mono text-rose-400">
             {formatINR(totalLiyaAmount)}
           </span>
@@ -61,14 +61,14 @@ export const LiyaPillar = () => {
         <input
           type="text"
           required
-          placeholder="Customer Name (ग्राहक का नाम) *"
+          placeholder="Customer name *"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
         />
         <input
           type="tel"
-          placeholder="Mobile No. (फ़ोन नंबर)"
+          placeholder="Mobile number"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 font-mono"
@@ -79,7 +79,7 @@ export const LiyaPillar = () => {
             type="number"
             required
             min="1"
-            placeholder="Liya Amount (लिया रकम) *"
+            placeholder="Withdrawal amount *"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-6 pr-3 py-2 text-xs font-mono font-bold text-rose-400 focus:outline-none focus:border-rose-500"
@@ -90,7 +90,7 @@ export const LiyaPillar = () => {
           onChange={(e) => setSourceAccount(e.target.value)}
           className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
         >
-          <option value="Cash in Hand">Cash in Hand (गल्ला नकद भुगतान)</option>
+          <option value="Cash in Hand">Cash in Hand</option>
           {activePortals.map(p => (
             <option key={p.id} value={`${p.name} (AEPS)`}>{p.name} (AEPS / Transfer)</option>
           ))}
@@ -103,7 +103,7 @@ export const LiyaPillar = () => {
           className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg py-2 transition-colors flex items-center justify-center gap-1.5 shadow-md"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Add Liya (दिया/लिया)</span>
+          <span>+ Add withdrawal</span>
         </button>
       </form>
 
@@ -134,7 +134,7 @@ export const LiyaPillar = () => {
               <th className="py-2.5 px-3">Mobile No.</th>
               <th className="py-2.5 px-3">Given From (Source)</th>
               <th className="py-2.5 px-3">Remark / Note</th>
-              <th className="py-2.5 px-3 text-right">Liya Amount (₹)</th>
+              <th className="py-2.5 px-3 text-right">Withdrawal (₹)</th>
               <th className="py-2.5 px-3 text-right">Action</th>
             </tr>
           </thead>

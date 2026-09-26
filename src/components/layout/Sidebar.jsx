@@ -6,12 +6,9 @@ import {
   Users,
   Receipt,
   Coins,
-  ArrowDownLeft,
-  ArrowUpRight,
   TrendingUp,
   History,
   RotateCcw,
-  Sparkles,
   Building2,
   Layers,
   X,
@@ -39,62 +36,14 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
   const [isCashCalcModalOpen, setIsCashCalcModalOpen] = useState(false);
 
   const navItems = [
-    {
-      id: 'all',
-      label: 'Complete Daily Hisab',
-      sublabel: 'All 4 Pillars on One Screen',
-      icon: LayoutDashboard,
-      badge: 'All-in-1'
-    },
-    {
-      id: 'portals',
-      label: '1. All Portals Balance',
-      sublabel: 'Spice, PayNearby, Fino & More',
-      icon: CreditCard,
-      badge: '10 IDs'
-    },
-    {
-      id: 'accounts',
-      label: '2. Bank Accounts & Cash',
-      sublabel: 'SBI, HDFC & Drawer Cash',
-      icon: Landmark,
-      badge: 'Cash/Bank'
-    },
-    {
-      id: 'people',
-      label: '3 & 4. Party & People Master',
-      sublabel: 'Customer Ledger (Jama & Liya)',
-      icon: Users,
-      badge: 'Master'
-    },
-    {
-      id: 'incomes',
-      label: 'Other Income & Services',
-      sublabel: 'AEPS, DMT, PF, Photo Copy (कमाई)',
-      icon: Coins,
-      badge: '+₹ Kamai'
-    },
-    {
-      id: 'expenses',
-      label: 'Shop Expenses & Spend',
-      sublabel: 'Tea, Paper, Bills (दुकान खर्च)',
-      icon: Receipt,
-      badge: 'Kharcha'
-    },
-    {
-      id: 'profit',
-      label: 'Profit & Earnings Chart',
-      sublabel: 'Daily Profit & Commission Analytics',
-      icon: TrendingUp,
-      badge: '₹ Profit'
-    },
-    {
-      id: 'history',
-      label: 'Daily History Archive',
-      sublabel: 'View Past Days & Previous Records',
-      icon: History,
-      badge: 'Past Data'
-    }
+    { id: 'all', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'portals', label: 'Portals', icon: CreditCard },
+    { id: 'accounts', label: 'Bank and cash', icon: Landmark },
+    { id: 'people', label: 'Customers', icon: Users },
+    { id: 'incomes', label: 'Income', icon: Coins },
+    { id: 'expenses', label: 'Expenses', icon: Receipt },
+    { id: 'profit', label: 'Profit', icon: TrendingUp },
+    { id: 'history', label: 'History', icon: History }
   ];
 
   return (
@@ -163,43 +112,14 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
                     setActiveTab(item.id);
                     if (onClose) onClose();
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all duration-200 group ${
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all duration-200 ${
                     isActive
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 font-semibold'
+                      ? 'bg-indigo-600 text-white font-semibold'
                       : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon
-                      className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${
-                        isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-400'
-                      }`}
-                    />
-                    <div className="min-w-0">
-                      <div className="text-xs font-semibold leading-tight truncate">
-                        {item.label}
-                      </div>
-                      <div
-                        className={`text-[10px] truncate leading-tight mt-0.5 ${
-                          isActive ? 'text-indigo-100' : 'text-slate-400'
-                        }`}
-                      >
-                        {item.sublabel}
-                      </div>
-                    </div>
-                  </div>
-
-                  {item.badge && (
-                    <span
-                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 uppercase tracking-wider ${
-                        isActive
-                          ? 'bg-white/20 text-white'
-                          : 'bg-slate-800 text-slate-400 border border-slate-700'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span className="text-sm font-medium">{item.label}</span>
                 </button>
               );
             })}
@@ -209,27 +129,16 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
         {/* Bottom utility: Theme Toggle + Reset & Fresh Start */}
         <div className="pt-3 border-t border-slate-800/80 space-y-2 mt-4">
           <div className="flex items-center justify-between p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-            <span className="text-xs font-semibold text-slate-300">थीम मोड (Theme)</span>
+            <span className="text-xs font-semibold text-slate-300">Theme</span>
             <ThemeToggle variant="compact" />
           </div>
 
-          <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
-            <div className="flex items-center gap-1.5 text-emerald-400 font-semibold text-[11px]">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>4-Pillar Daily Tally Active</span>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-1 leading-snug">
-              Portals + Bank & Cash + Liya - Jama = Net Hisab
-            </p>
-          </div>
-
-          {/* 💵 Cash Denomination Calculator */}
           <button
             onClick={() => setIsCashCalcModalOpen(true)}
             className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-emerald-200 text-xs font-bold border border-emerald-500/30 transition-all cursor-pointer shadow-sm"
           >
             <Calculator className="w-3.5 h-3.5 text-emerald-400" />
-            <span>💵 नोट कैलकुलेटर (Cash Count)</span>
+            <span>Note calculator</span>
           </button>
 
           <button
@@ -237,7 +146,7 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
             className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 text-xs font-bold border border-rose-500/30 transition-all cursor-pointer shadow-sm"
           >
             <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
-            <span>🔄 रीसेट व फ्रेश शुरुआत (Reset)</span>
+            <span>Reset and fresh start</span>
           </button>
         </div>
       </aside>
@@ -253,12 +162,12 @@ export const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }) => {
         <CashDenominationModal
           isOpen={isCashCalcModalOpen}
           onClose={() => setIsCashCalcModalOpen(false)}
-          targetAccountName="Cash in Hand (गल्ला कैश)"
+          targetAccountName="Cash in Hand"
           onApplyCash={(totalCalculated) => {
             const cashAcc = activeBankAccounts.find(a => a.type === 'CASH') || activeBankAccounts[0];
             if (cashAcc) {
               setBankAccountDirectTodayBalance(cashAcc.id, totalCalculated);
-              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} गल्ला कैश में सेट कर दिया गया!`, 'success');
+              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} set as cash in hand.`, 'success');
             }
           }}
         />

@@ -40,7 +40,7 @@ export const JamaPillar = () => {
           <div className="flex items-center gap-2">
             <ArrowDownLeft className="w-5 h-5 text-emerald-400" />
             <h3 className="text-lg font-bold text-white tracking-wide">
-              3. People's Deposits (लोगों के कितने जमा हैं - Jama)
+              3. Customer deposits
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -49,7 +49,7 @@ export const JamaPillar = () => {
         </div>
 
         <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-right">
-          <span className="text-[10px] text-slate-400 font-bold uppercase block">Total People Jama</span>
+          <span className="text-[10px] text-slate-400 font-bold uppercase block">Total deposits</span>
           <span className="text-lg font-black font-mono text-emerald-400">
             {formatINR(totalJamaAmount)}
           </span>
@@ -61,14 +61,14 @@ export const JamaPillar = () => {
         <input
           type="text"
           required
-          placeholder="Customer Name (ग्राहक का नाम) *"
+          placeholder="Customer name *"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
         />
         <input
           type="tel"
-          placeholder="Mobile No. (फ़ोन नंबर)"
+          placeholder="Mobile number"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono"
@@ -79,7 +79,7 @@ export const JamaPillar = () => {
             type="number"
             required
             min="1"
-            placeholder="Deposit Amount (जमा रकम) *"
+            placeholder="Deposit amount *"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-6 pr-3 py-2 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
@@ -90,7 +90,7 @@ export const JamaPillar = () => {
           onChange={(e) => setTargetAccount(e.target.value)}
           className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
         >
-          <option value="Cash in Hand">Cash in Hand (गल्ला नकद)</option>
+          <option value="Cash in Hand">Cash in Hand</option>
           {activeBankAccounts.map(b => (
             <option key={b.id} value={b.name}>{b.name}</option>
           ))}
@@ -103,7 +103,7 @@ export const JamaPillar = () => {
           className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg py-2 transition-colors flex items-center justify-center gap-1.5 shadow-md"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Add Jama (जमा करें)</span>
+          <span>+ Add deposit</span>
         </button>
       </form>
 
@@ -134,7 +134,7 @@ export const JamaPillar = () => {
               <th className="py-2.5 px-3">Mobile No.</th>
               <th className="py-2.5 px-3">Received In (Account/Portal)</th>
               <th className="py-2.5 px-3">Remark / Note</th>
-              <th className="py-2.5 px-3 text-right">Jama Amount (₹)</th>
+              <th className="py-2.5 px-3 text-right">Deposit (₹)</th>
               <th className="py-2.5 px-3 text-right">Action</th>
             </tr>
           </thead>

@@ -13,11 +13,11 @@ export const PastHistoryView = ({ onSelectDate }) => {
           <div className="flex items-center gap-2">
             <History className="w-5 h-5 text-indigo-400" />
             <h3 className="text-lg font-bold text-white tracking-wide">
-              Daily History & Past Registers Archive (दैनिक व पिछला इतिहास)
+              Daily history and past registers
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Click on any date to load that day's complete Portals, Bank accounts, Jama and Liya records
+            Click a date to open that day's portals, bank accounts, deposits, and withdrawals
           </p>
         </div>
 
@@ -30,12 +30,12 @@ export const PastHistoryView = ({ onSelectDate }) => {
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/60">
-              <th className="py-3 px-3">Date (तारीख)</th>
+              <th className="py-3 px-3">Date</th>
               <th className="py-3 px-3 text-right">1. Portals Total</th>
               <th className="py-3 px-3 text-right">2. Bank & Cash</th>
-              <th className="py-3 px-3 text-right">3. Total Jama (+)</th>
-              <th className="py-3 px-3 text-right">4. Total Liya (-)</th>
-              <th className="py-3 px-3 text-right">Net Total Hisab</th>
+              <th className="py-3 px-3 text-right">3. Total deposits (+)</th>
+              <th className="py-3 px-3 text-right">4. Total withdrawals (−)</th>
+              <th className="py-3 px-3 text-right">Net capital</th>
               <th className="py-3 px-3 text-right">Action</th>
             </tr>
           </thead>
@@ -96,7 +96,7 @@ export const PastHistoryView = ({ onSelectDate }) => {
                       }`}
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span>{isSelected ? 'Viewing' : 'Open Hisab'}</span>
+                      <span>{isSelected ? 'Viewing' : 'Open day'}</span>
                     </button>
                   </td>
                 </tr>

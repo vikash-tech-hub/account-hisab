@@ -34,7 +34,7 @@ export const PortalsPillar = ({ onNext }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [entryMode, setEntryMode] = useState('direct'); // 'direct' (Aaj ka balance) or 'detailed' (Inflow/Outflow)
 
-  const yesterdayDate = getPreviousDateString ? getPreviousDateString(selectedDate) : 'कल';
+  const yesterdayDate = getPreviousDateString ? getPreviousDateString(selectedDate) : 'Yesterday';
 
   const handleAddSubmit = (e) => {
     e.preventDefault();
@@ -78,11 +78,11 @@ export const PortalsPillar = ({ onNext }) => {
           <div className="flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-amber-400" />
             <h3 className="text-lg font-bold text-white tracking-wide">
-              1. All Money Transfer Portals Balance (सभी 10 पोर्टल)
+              Portal balances
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            कल का क्लोजिंग = आज का ओपनिंग | सिर्फ आज का लाइव बैलेंस भरें और हिसाब तुरंत पाएं
+            Yesterday's closing becomes today's opening. Enter today's live balance.
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export const PortalsPillar = ({ onNext }) => {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>आज का बैलेंस (Quick)</span>
+              <span>Today's balance</span>
             </button>
             <button
               onClick={() => setEntryMode('detailed')}
@@ -118,10 +118,10 @@ export const PortalsPillar = ({ onNext }) => {
           <button
             onClick={carryForwardAllYesterday}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition-all shadow-sm"
-            title="कल का क्लोजिंग बैलेंस आज के ओपनिंग में कॉपी करें"
+            title="Copy yesterday's closing into today's opening"
           >
             <Zap className="w-4 h-4 text-amber-400" />
-            <span>⚡ कल का बैलेंस लाएं ({yesterdayDate})</span>
+            <span>Use yesterday's balance ({yesterdayDate})</span>
           </button>
 
           {/* Total Badge */}
@@ -150,9 +150,9 @@ export const PortalsPillar = ({ onNext }) => {
             {entryMode === 'direct' ? (
               <tr className="border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/60">
                 <th className="py-3 px-3">Portal Name & ID</th>
-                <th className="py-3 px-3 text-right">🌅 कल का बैलेंस / सुबह का ओपनिंग (₹)</th>
-                <th className="py-3 px-3 text-right text-indigo-400">📱 आज का लाइव बैलेंस (Today's Balance ₹)</th>
-                <th className="py-3 px-3 text-right">🔄 आज का फर्क (Net Change)</th>
+                <th className="py-3 px-3 text-right">Opening balance (₹)</th>
+                <th className="py-3 px-3 text-right text-indigo-400">Today's balance (₹)</th>
+                <th className="py-3 px-3 text-right">Change today</th>
                 <th className="py-3 px-3 text-right">Action</th>
               </tr>
             ) : (
@@ -195,7 +195,7 @@ export const PortalsPillar = ({ onNext }) => {
                         <div className="inline-flex items-center justify-end">
                           <span
                             className="font-mono font-semibold text-slate-400 bg-slate-950/80 border border-slate-800/80 px-3 py-1.5 rounded-lg text-xs cursor-not-allowed select-none"
-                            title="कल का क्लोजिंग बैलेंस (Locked & Auto-Loaded)"
+                            title="Yesterday's closing (locked)"
                           >
                             🔒 {formatINR(portal.opening)}
                           </span>
@@ -232,7 +232,7 @@ export const PortalsPillar = ({ onNext }) => {
                         >
                           {diff > 0 && <TrendingUp className="w-3 h-3 text-emerald-400" />}
                           {diff < 0 && <TrendingDown className="w-3 h-3 text-rose-400" />}
-                          {diff > 0 ? `+${formatINR(diff)}` : diff < 0 ? `-${formatINR(Math.abs(diff))}` : 'बराबर (₹0)'}
+                          {diff > 0 ? `+${formatINR(diff)}` : diff < 0 ? `-${formatINR(Math.abs(diff))}` : 'Even (₹0)'}
                         </span>
                       </td>
                     </>
@@ -303,7 +303,7 @@ export const PortalsPillar = ({ onNext }) => {
       <div className="pt-3 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs text-slate-400">
           <span className="w-2 h-2 rounded-full bg-amber-400" />
-          <span>कुल 10 पोर्टल बैलेंस:</span>
+          <span>Total portal balance:</span>
           <span className="font-mono font-bold text-amber-300 text-sm">{formatINR(totalPortalsBalance)}</span>
         </div>
 
@@ -312,29 +312,29 @@ export const PortalsPillar = ({ onNext }) => {
             onClick={() => {
               triggerLoader({
                 duration: 2200,
-                subtitle: '📱 10 पोर्टल बैलेंस सुरक्षित हो रहा है...',
-                onFinish: () => showToast('✅ सभी पोर्टल बैलेंस सुरक्षित हो गए!')
+                subtitle: 'Saving portal balances...',
+                onFinish: () => showToast('Portal balances saved.')
               });
             }}
             className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
           >
-            <span>💾 सेव करें (Save)</span>
+            <span>Save</span>
           </button>
 
           <button
             onClick={() => {
               triggerLoader({
                 duration: 2400,
-                subtitle: '📱 पोर्टल बैलेंस सेव हुआ! 🏦 बैंक खाते लोड हो रहे हैं...',
+                subtitle: 'Portals saved. Opening bank accounts...',
                 onFinish: () => {
-                  showToast('✨ पोर्टल बैलेंस सेव हो गया! अगला: बैंक खाते व कैश');
+                  showToast('Portals saved. Next: bank accounts and cash.');
                   if (onNext) onNext();
                 }
               });
             }}
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 cursor-pointer group"
           >
-            <span>💾 सेव करें और अगला: बैंक खाते (Save & Next)</span>
+            <span>Save and next: Bank accounts</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </button>
         </div>

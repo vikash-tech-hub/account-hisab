@@ -17,12 +17,12 @@ export const AddCustomerModal = ({ isOpen, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name) {
-      if (showToast) showToast('⚠️ कृपया ग्राहक का नाम दर्ज करें', 'error');
+      if (showToast) showToast('Enter the customer name', 'error');
       return;
     }
 
     addCustomer(formData);
-    if (showToast) showToast(`✅ ग्राहक "${formData.name}" जुड़ गया!`, 'success');
+    if (showToast) showToast(`✅ Customer "${formData.name}" added.`, 'success');
     onClose();
   };
 
@@ -30,7 +30,7 @@ export const AddCustomerModal = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add New Customer Khata Account"
+      title="Add customer account"
       subtitle="Create a ledger account for a regular customer, merchant or party"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -133,7 +133,7 @@ export const AddCustomerModal = ({ isOpen, onClose }) => {
             type="submit"
             className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all"
           >
-            Create Customer Khata
+            Create customer
           </button>
         </div>
       </form>

@@ -35,7 +35,7 @@ export const ThemeToggle = ({ variant = 'navbar', className = '' }) => {
           ? 'bg-slate-800/90 hover:bg-slate-800 border-slate-700 text-amber-300 hover:text-amber-200'
           : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-800 hover:text-indigo-600'
       } ${className}`}
-      title={isDark ? 'Switch to Light Theme (लाइट थीम)' : 'Switch to Dark Theme (डार्क थीम)'}
+      title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
       aria-label="Toggle Theme"
     >
       {isDark ? (

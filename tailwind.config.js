@@ -30,8 +30,7 @@ export default {
       },
       fontFamily: {
         sans: ['Outfit', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-        hindi: ['Noto Sans Devanagari', 'sans-serif']
+        mono: ['JetBrains Mono', 'monospace']
       },
       boxShadow: {
         'fintech': '0 10px 30px -10px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04)',

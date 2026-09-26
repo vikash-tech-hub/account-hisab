@@ -81,7 +81,7 @@ export const DenominationCounter = () => {
     { denom: '20', val: 20, name: '₹20 Notes', color: 'border-yellow-500/40 bg-yellow-950/30 text-yellow-300' },
     { denom: '10', val: 10, name: '₹10 Notes', color: 'border-orange-600/40 bg-orange-950/30 text-orange-300' },
     { denom: '5', val: 5, name: '₹5 Notes', color: 'border-emerald-600/40 bg-emerald-950/30 text-emerald-300' },
-    { denom: 'coins', val: 1, name: 'Coins (सिक्के)', color: 'border-slate-600 bg-slate-900 text-slate-300' }
+    { denom: 'coins', val: 1, name: 'Coins', color: 'border-slate-600 bg-slate-900 text-slate-300' }
   ];
 
   return (

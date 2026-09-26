@@ -33,7 +33,7 @@ export const CustomerDetailModal = ({ customer, isOpen, onClose, onQuickTransact
   const handleQuickEntry = (type) => {
     const amount = Number(quickAmount);
     if (!amount || amount <= 0) {
-      if (showToast) showToast('⚠️ कृपया सही रकम भरें', 'error');
+      if (showToast) showToast('Enter a valid amount', 'error');
       return;
     }
 
@@ -44,7 +44,7 @@ export const CustomerDetailModal = ({ customer, isOpen, onClose, onQuickTransact
       customerPhone: customer.phone,
       amount,
       commission: 0,
-      remark: quickRemark || (type === 'JAMA' ? 'Direct Khata Cash Deposit' : 'Direct Khata Cash Withdrawal / Udhar')
+      remark: quickRemark || (type === 'JAMA' ? 'Cash deposit' : 'Cash withdrawal')
     });
 
     setQuickAmount('');
@@ -114,7 +114,7 @@ export const CustomerDetailModal = ({ customer, isOpen, onClose, onQuickTransact
         >
           <div>
             <div className="text-xs uppercase font-bold tracking-wider opacity-80">
-              Net Khata Balance
+              Net balance
             </div>
             <div className="text-2xl font-extrabold font-mono mt-0.5">
               {formatINR(Math.abs(netBalance))}
@@ -141,7 +141,7 @@ export const CustomerDetailModal = ({ customer, isOpen, onClose, onQuickTransact
         {/* Quick Payment Entry in Khata */}
         <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            Quick Khata Entry
+            Quick entry
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

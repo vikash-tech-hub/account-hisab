@@ -27,7 +27,7 @@ import {
 export const INCOME_CATEGORIES = [
   {
     id: 'AEPS',
-    name: 'AEPS निकासी कमीशन (AEPS Cash Out)',
+    name: 'AEPS cash-out commission',
     shortName: 'AEPS Comm',
     icon: Fingerprint,
     color: 'text-emerald-400',
@@ -36,7 +36,7 @@ export const INCOME_CATEGORIES = [
   },
   {
     id: 'DMT',
-    name: 'मनी ट्रांसफर चार्ज (DMT Transfer Fee)',
+    name: 'Money transfer fee',
     shortName: 'DMT Fee',
     icon: Send,
     color: 'text-sky-400',
@@ -45,7 +45,7 @@ export const INCOME_CATEGORIES = [
   },
   {
     id: 'PF',
-    name: 'PF / ईपीएफओ फॉर्म फीस (PF Claim & KYC)',
+    name: 'PF / EPFO form fee',
     shortName: 'PF / EPFO',
     icon: FileCheck2,
     color: 'text-amber-400',
@@ -54,7 +54,7 @@ export const INCOME_CATEGORIES = [
   },
   {
     id: 'PHOTOCOPY',
-    name: 'फोटोकॉपी व प्रिंटआउट (Xerox & Print)',
+    name: 'Photocopy and print',
     shortName: 'Xerox & Print',
     icon: Printer,
     color: 'text-purple-400',
@@ -63,7 +63,7 @@ export const INCOME_CATEGORIES = [
   },
   {
     id: 'PAN_PASSPORT',
-    name: 'पैन कार्ड व सरकारी दस्तावेज (PAN / Govt Form)',
+    name: 'PAN and government forms',
     shortName: 'PAN / Govt',
     icon: CreditCard,
     color: 'text-indigo-400',
@@ -72,7 +72,7 @@ export const INCOME_CATEGORIES = [
   },
   {
     id: 'BILL_PAYMENT',
-    name: 'बिजली व बिल सर्विस चार्ज (Bill Payment Fee)',
+    name: 'Bill payment fee',
     shortName: 'Bill Payment',
     icon: Zap,
     color: 'text-yellow-400',
@@ -81,7 +81,7 @@ export const INCOME_CATEGORIES = [
   },
   {
     id: 'OTHER',
-    name: 'अन्य विविध कमाई (Other Services)',
+    name: 'Other services',
     shortName: 'Other Services',
     icon: Tag,
     color: 'text-slate-400',
@@ -201,7 +201,7 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg sm:text-xl font-black text-white tracking-wide">
-                Other Income & Service Fees (दुकान की अन्य कमाई)
+                Other income and service fees
               </h2>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
                 {todaysIncomes.length} Entries
@@ -216,11 +216,11 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
         {/* Live Net Profit & Total Income Badges */}
         <div className="flex items-center gap-2.5 shrink-0">
           <div className="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-right">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Income (कुल कमाई)</div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total income</div>
             <div className="text-lg font-mono font-black text-emerald-400">{formatINR(totalIncomes)}</div>
           </div>
           <div className="px-3.5 py-2 rounded-xl bg-slate-950 border border-indigo-500/30 text-right">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Net Profit (कमाई - खर्च)</div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Net profit (income − expenses)</div>
             <div className={`text-lg font-mono font-black ${netTodayProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {formatINR(netTodayProfit)}
             </div>
@@ -268,7 +268,7 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
       <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Quick 1-Click Presets (जल्दी कमाई जोड़ें)</span>
+          <span>Quick income presets</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {QUICK_INCOME_PRESETS.map((preset, idx) => (
@@ -294,14 +294,14 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
       >
         <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
           <Plus className="w-4 h-4 text-emerald-400" />
-          <span>Add New Service Income / Fee (नई कमाई एंट्री करें)</span>
+          <span>Add service income</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Service Title */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-              Service / Work Name (काम का नाम) *
+              Service name *
             </label>
             <input
               type="text"
@@ -316,7 +316,7 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
           {/* Amount */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-              Amount Received (रुपये ₹) *
+              Amount received (₹) *
             </label>
             <div className="relative">
               <span className="absolute left-3 top-2 text-xs font-bold text-slate-500">₹</span>
@@ -335,7 +335,7 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
           {/* Category */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-              Category (सर्विस श्रेणी)
+              Category
             </label>
             <select
               value={category}
@@ -353,14 +353,14 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
           {/* Payment Mode */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-400 mb-1">
-              Received In (भुगतान कहाँ मिला)
+              Received in
             </label>
             <select
               value={paymentMode}
               onChange={(e) => setPaymentMode(e.target.value)}
               className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors"
             >
-              <option value="Cash in Hand">💵 Cash in Hand (गल्ला कैश)</option>
+              <option value="Cash in Hand">Cash in Hand</option>
               <option value="UPI / Online QR">📱 PhonePe / GPay / QR UPI</option>
               {activeBankAccounts.map((acc) => (
                 <option key={acc.id} value={acc.name}>
@@ -533,13 +533,13 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
               className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>⬅️ पिछला: ग्राहक खाता</span>
+              <span>Back: Customer accounts</span>
             </button>
           )}
 
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>कुल आज की कमाई:</span>
+            <span>Today's income:</span>
             <span className="font-mono font-bold text-emerald-300 text-sm">{formatINR(totalIncomes)}</span>
           </div>
         </div>
@@ -549,29 +549,29 @@ export const IncomeTracker = ({ onNext, onPrev }) => {
             onClick={() => {
               triggerLoader({
                 duration: 2200,
-                subtitle: '💰 अन्य कमाई व सर्विस कमीशन सुरक्षित हो रहा है...',
-                onFinish: () => showToast('✅ सभी सेवा कमाई रिकॉर्ड सुरक्षित हो गए!')
+                subtitle: 'Saving other income...',
+                onFinish: () => showToast('Income records saved.')
               });
             }}
             className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
           >
-            <span>💾 सेव करें (Save)</span>
+            <span>Save</span>
           </button>
 
           <button
             onClick={() => {
               triggerLoader({
                 duration: 2400,
-                subtitle: '💰 अन्य कमाई सुरक्षित! ☕ दुकान खर्चे लोड हो रहे हैं...',
+                subtitle: 'Income saved. Opening shop expenses...',
                 onFinish: () => {
-                  showToast('✨ अन्य कमाई सेव हो गई! अगला: दुकान खर्च (Expenses)');
+                  showToast('Income saved. Next: shop expenses.');
                   if (onNext) onNext();
                 }
               });
             }}
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2 cursor-pointer group"
           >
-            <span>💾 सेव करें और अगला: दुकान खर्च (Save & Next)</span>
+            <span>Save and next: Expenses</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </button>
         </div>

@@ -47,7 +47,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
     localStorage.setItem(PIN_ENABLED_STORAGE_KEY, String(nextState));
     setPinError('');
     showToast(
-      nextState ? '🔒 PIN सुरक्षा चालू (PIN Protected Mode On)' : '🔓 PIN सुरक्षा बंद (Unpin / Fast Mode On)',
+      nextState ? 'PIN protection on' : 'PIN protection off',
       'info'
     );
   };
@@ -85,19 +85,19 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
     // If PIN is enabled, verify PIN
     if (isPinEnabled) {
       if (!enteredPin) {
-        setPinError('कृपया सुरक्षा पिन दर्ज करें (Default: 1234)');
+        setPinError('Enter the security PIN (default: 1234)');
         document.getElementById('new-acc-pin-input')?.focus();
         return;
       }
       if (enteredPin !== savedPin) {
-        setPinError('❌ गलत पिन! सही एडमिन पिन भरें (Default: 1234)');
+        setPinError('Wrong PIN. Enter the admin PIN (default: 1234)');
         document.getElementById('new-acc-pin-input')?.focus();
         return;
       }
     }
 
     if (!formData.name.trim()) {
-      showToast('⚠️ कृपया खाता या बैंक का नाम दर्ज करें', 'error');
+      showToast('Enter an account or bank name', 'error');
       document.getElementById('new-acc-name-input')?.focus();
       return;
     }
@@ -114,7 +114,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
       withdrawals: 0
     });
 
-    showToast(`✅ नया खाता "${displayName}" सफलतापूर्वक जोड़ दिया गया!`, 'success');
+    showToast(`✅ Account "${displayName}" added.`, 'success');
 
     // Reset and close
     setFormData({
@@ -139,7 +139,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white">+ नया बैंक या गल्ला खाता जोड़ें</h3>
+                <h3 className="text-base font-bold text-white">+ Add bank or cash account</h3>
                 
                 {/* 🔒 / 🔓 Interactive PIN & UNPIN Toggle Button */}
                 <button
@@ -150,7 +150,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
                       ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30 shadow-sm'
                       : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:bg-slate-700'
                   }`}
-                  title="पिन सुरक्षा चालू / बंद (Pin & Unpin) करने के लिए क्लिक करें"
+                  title="Turn PIN protection on or off"
                 >
                   {isPinEnabled ? (
                     <>
@@ -165,7 +165,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-slate-400">नया बैंक खाता या गल्ला कैश रजिस्टर जोड़ें</p>
+              <p className="text-xs text-slate-400">Add a bank account or cash drawer</p>
             </div>
           </div>
           <button
@@ -181,7 +181,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
           {/* Account Type */}
           <div>
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              खाता प्रकार (Account Type)
+              Account type
             </label>
             <div className="grid grid-cols-2 gap-2.5">
               <button
@@ -196,7 +196,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
                 <Landmark className="w-4 h-4 text-sky-400" />
                 <div className="text-left">
                   <div>Bank Account</div>
-                  <div className="text-[10px] text-slate-400 font-normal">बैंक खाता / Current / Savings</div>
+                  <div className="text-[10px] text-slate-400 font-normal">Bank account / Current / Savings</div>
                 </div>
               </button>
 
@@ -212,7 +212,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
                 <Wallet className="w-4 h-4 text-emerald-400" />
                 <div className="text-left">
                   <div>Cash Drawer</div>
-                  <div className="text-[10px] text-slate-400 font-normal">गल्ला कैश / Physical Cash</div>
+                  <div className="text-[10px] text-slate-400 font-normal">Physical cash</div>
                 </div>
               </button>
             </div>
@@ -221,13 +221,13 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
           {/* Account / Bank Name */}
           <div>
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              खाता / बैंक का नाम (Account Name) <span className="text-rose-400">*</span>
+              Account or bank name <span className="text-rose-400">*</span>
             </label>
             <input
               id="new-acc-name-input"
               type="text"
               required
-              placeholder={formData.type === 'BANK' ? 'उदा. SBI Main Current A/C, ICICI Settlement' : 'उदा. Shop Cash Drawer, गल्ला 2'}
+              placeholder={formData.type === 'BANK' ? 'e.g. SBI Current A/C, ICICI Settlement' : 'e.g. Shop cash drawer'}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               onKeyDown={(e) => handleFieldKeyDown(e, 'new-acc-number-input')}
@@ -239,12 +239,12 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                खाता नंबर / अंतिम 4 अंक (Optional)
+                Account number / last 4 digits (optional)
               </label>
               <input
                 id="new-acc-number-input"
                 type="text"
-                placeholder="उदा. 4882 या पूरा A/C no."
+                placeholder="e.g. 4882 or the full account number"
                 value={formData.accountNumber}
                 onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
                 onKeyDown={(e) => handleFieldKeyDown(e, 'new-acc-opening-input')}
@@ -254,7 +254,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
 
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                ओपनिंग बैलेंस (Opening Balance ₹)
+                Opening balance (₹)
               </label>
               <input
                 id="new-acc-opening-input"
@@ -274,7 +274,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-amber-300 flex items-center gap-1.5 uppercase tracking-wider">
                   <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-                  <span>मालिक/एडमिन सुरक्षा पिन (Security PIN) <span className="text-rose-400">*</span></span>
+                  <span>Owner / admin security PIN <span className="text-rose-400">*</span></span>
                 </label>
                 <span className="text-[10px] text-amber-400/80 font-mono font-medium">
                   (Default PIN: 1234)
@@ -287,7 +287,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
                   type={showPin ? 'text' : 'password'}
                   required
                   maxLength="6"
-                  placeholder="4-अंकों का सुरक्षा पिन भरें (1234)"
+                  placeholder="Enter the 4-digit PIN (1234)"
                   value={enteredPin}
                   onChange={(e) => {
                     setEnteredPin(e.target.value);
@@ -300,7 +300,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
                   type="button"
                   onClick={() => setShowPin(!showPin)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1"
-                  title={showPin ? 'पिन छुपाएं' : 'पिन देखें'}
+                  title={showPin ? 'Hide PIN' : 'Show PIN'}
                 >
                   {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -323,7 +323,7 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
               className="text-[11px] font-semibold text-slate-400 hover:text-sky-300 flex items-center gap-1 transition-colors"
             >
               {isPinEnabled ? <Unlock className="w-3.5 h-3.5 text-amber-400" /> : <Lock className="w-3.5 h-3.5 text-slate-400" />}
-              <span>{isPinEnabled ? '🔓 PIN बंद करें (Unpin)' : '🔒 PIN चालू करें (Enable PIN)'}</span>
+              <span>{isPinEnabled ? 'Turn PIN off' : 'Turn PIN on'}</span>
             </button>
 
             <div className="flex items-center gap-2.5">
@@ -332,14 +332,14 @@ export const AddBankAccountModal = ({ isOpen, onClose }) => {
                 onClick={onClose}
                 className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
               >
-                रद्द करें (Cancel)
+                Cancel
               </button>
               <button
                 type="submit"
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-lg shadow-sky-600/30 transition-all cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>खाता जोड़ें (Save Account)</span>
+                <span>Save account</span>
               </button>
             </div>
           </div>

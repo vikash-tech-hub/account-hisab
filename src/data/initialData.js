@@ -23,7 +23,7 @@ export const INITIAL_BRANCHES = [
   }
 ];
 
-// Unified Customer Master List (ग्राहक / पार्टी मास्टर)
+// Unified customer master list
 export const INITIAL_CUSTOMERS = [
   { id: 'c1', name: 'Ramesh Kumar Verma (Dairy)', phone: '9839123456', category: 'Dairy Vendor', address: 'Market Road' },
   { id: 'c2', name: 'Sunita Devi (Kirana Store)', phone: '9415234567', category: 'Shopkeeper', address: 'Chowk Bazar' },
@@ -96,28 +96,28 @@ export const INITIAL_DAILY_PORTALS = {
 export const INITIAL_DAILY_ACCOUNTS = {
   // Today - Branch 1
   [`branch-1_${TODAY_KEY}`]: [
-    { id: 'acc-1', name: 'Cash in Hand (गल्ला कैश)', type: 'CASH', opening: 45000, deposits: 32000, withdrawals: 28000, color: '#10b981' },
+    { id: 'acc-1', name: 'Cash in Hand', type: 'CASH', opening: 45000, deposits: 32000, withdrawals: 28000, color: '#10b981' },
     { id: 'acc-2', name: 'SBI Main Current A/C (3098****44)', type: 'BANK', opening: 85000, deposits: 25000, withdrawals: 15000, color: '#0284c7' },
     { id: 'acc-3', name: 'HDFC CSP Settlement A/C (5020****11)', type: 'BANK', opening: 50000, deposits: 20000, withdrawals: 10000, color: '#4f46e5' },
     { id: 'acc-4', name: 'PNB Savings A/C (0045****99)', type: 'BANK', opening: 25000, deposits: 5000, withdrawals: 0, color: '#dc2626' }
   ],
   // Yesterday - Branch 1
   [`branch-1_${YESTERDAY_KEY}`]: [
-    { id: 'acc-1', name: 'Cash in Hand (गल्ला कैश)', type: 'CASH', opening: 42000, deposits: 28000, withdrawals: 25000, color: '#10b981' },
+    { id: 'acc-1', name: 'Cash in Hand', type: 'CASH', opening: 42000, deposits: 28000, withdrawals: 25000, color: '#10b981' },
     { id: 'acc-2', name: 'SBI Main Current A/C (3098****44)', type: 'BANK', opening: 75000, deposits: 30000, withdrawals: 20000, color: '#0284c7' },
     { id: 'acc-3', name: 'HDFC CSP Settlement A/C (5020****11)', type: 'BANK', opening: 45000, deposits: 15000, withdrawals: 10000, color: '#4f46e5' },
     { id: 'acc-4', name: 'PNB Savings A/C (0045****99)', type: 'BANK', opening: 20000, deposits: 5000, withdrawals: 0, color: '#dc2626' }
   ],
   // Day Before Yesterday - Branch 1
   [`branch-1_${DAY_BEFORE_KEY}`]: [
-    { id: 'acc-1', name: 'Cash in Hand (गल्ला कैश)', type: 'CASH', opening: 38000, deposits: 30000, withdrawals: 26000, color: '#10b981' },
+    { id: 'acc-1', name: 'Cash in Hand', type: 'CASH', opening: 38000, deposits: 30000, withdrawals: 26000, color: '#10b981' },
     { id: 'acc-2', name: 'SBI Main Current A/C (3098****44)', type: 'BANK', opening: 70000, deposits: 25000, withdrawals: 20000, color: '#0284c7' },
     { id: 'acc-3', name: 'HDFC CSP Settlement A/C (5020****11)', type: 'BANK', opening: 40000, deposits: 12000, withdrawals: 7000, color: '#4f46e5' },
     { id: 'acc-4', name: 'PNB Savings A/C (0045****99)', type: 'BANK', opening: 18000, deposits: 4000, withdrawals: 2000, color: '#dc2626' }
   ],
   // Branch 2 Today
   [`branch-2_${TODAY_KEY}`]: [
-    { id: 'acc-1-b2', name: 'Cash in Hand (गल्ला कैश)', type: 'CASH', opening: 30000, deposits: 20000, withdrawals: 18000, color: '#10b981' },
+    { id: 'acc-1-b2', name: 'Cash in Hand', type: 'CASH', opening: 30000, deposits: 20000, withdrawals: 18000, color: '#10b981' },
     { id: 'acc-2-b2', name: 'SBI Station Road Branch A/C', type: 'BANK', opening: 60000, deposits: 15000, withdrawals: 10000, color: '#0284c7' },
     { id: 'acc-3-b2', name: 'Canara Bank Current A/C', type: 'BANK', opening: 35000, deposits: 10000, withdrawals: 5000, color: '#f59e0b' }
   ]
@@ -262,7 +262,7 @@ export const INITIAL_LIYA_RECORDS = [
     name: 'Mohd. Imran (Auto Garage)',
     phone: '9335567890',
     amount: 22500,
-    portalOrAccount: 'Cash in Hand (Udhar)',
+    portalOrAccount: 'Cash in Hand (credit)',
     time: '04:00 PM',
     note: 'Emergency parts cash withdrawal on credit'
   },
@@ -315,7 +315,7 @@ export const INITIAL_LIYA_RECORDS = [
   }
 ];
 
-// Daily Shop Expenses & Spend records (दुकान के दैनिक खर्चे)
+// Daily shop expense records
 export const INITIAL_EXPENSES = [
   // Today - Branch 1
   {
@@ -431,7 +431,7 @@ export const INITIAL_EXPENSES = [
   }
 ];
 
-// Daily Other Income & Service Fees records (दुकान की अन्य कमाई / सेवा शुल्क - AEPS, DMT, PF, Photo Copy, etc.)
+// Daily other income and service fee records (AEPS, DMT, PF, photocopy, and more)
 export const INITIAL_INCOMES = [
   // Today - Branch 1
   {

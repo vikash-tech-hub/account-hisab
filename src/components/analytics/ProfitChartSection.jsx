@@ -35,9 +35,9 @@ export const ProfitChartSection = () => {
     { date: '11 Sep', grossCommission: 2100, expenses: 450, netProfit: 1650, dmtVolume: 92000, aepsVolume: 51000 },
     { date: '12 Sep', grossCommission: 2450, expenses: 280, netProfit: 2170, dmtVolume: 110000, aepsVolume: 65000 },
     { date: '13 Sep', grossCommission: 1900, expenses: 350, netProfit: 1550, dmtVolume: 78000, aepsVolume: 48000 },
-    { date: '14 Sep (परसों)', grossCommission: 2300, expenses: 400, netProfit: 1900, dmtVolume: 95000, aepsVolume: 58000 },
-    { date: '15 Sep (कल)', grossCommission: 2650, expenses: 520, netProfit: 2130, dmtVolume: 125000, aepsVolume: 72000 },
-    { date: '16 Sep (आज)', grossCommission: totalIncomes || 2950, expenses: totalExpenses || 480, netProfit: (totalIncomes || 2950) - (totalExpenses || 480), dmtVolume: 145000, aepsVolume: 88000 }
+    { date: '14 Sep', grossCommission: 2300, expenses: 400, netProfit: 1900, dmtVolume: 95000, aepsVolume: 58000 },
+    { date: '15 Sep', grossCommission: 2650, expenses: 520, netProfit: 2130, dmtVolume: 125000, aepsVolume: 72000 },
+    { date: '16 Sep', grossCommission: totalIncomes || 2950, expenses: totalExpenses || 480, netProfit: (totalIncomes || 2950) - (totalExpenses || 480), dmtVolume: 145000, aepsVolume: 88000 }
   ];
 
   // Service & Portal-wise Commission Earnings Breakdown (Today)
@@ -68,7 +68,7 @@ export const ProfitChartSection = () => {
             </div>
             <div>
               <h2 className="text-xl font-bold text-white tracking-wide">
-                Profit & Commission Analytics (दैनिक व साप्ताहिक मुनाफ़ा चार्ट)
+                Profit and Commission Analytics
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
                 Branch: <span className="text-indigo-400 font-semibold">{activeBranch.name}</span> | Daily commission earnings, shop expenses and net profit
@@ -107,7 +107,7 @@ export const ProfitChartSection = () => {
         <div className="bg-slate-900/90 border border-emerald-500/30 p-5 rounded-2xl shadow-xl flex items-center justify-between">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-              Today's Net Profit (आज का शुद्ध लाभ)
+              Today's Net Profit
             </span>
             <div className="text-2xl font-black font-mono text-emerald-400 mt-1">
               +{formatINR(todayProfit)}
@@ -124,7 +124,7 @@ export const ProfitChartSection = () => {
         <div className="bg-slate-900/90 border border-indigo-500/30 p-5 rounded-2xl shadow-xl flex items-center justify-between">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-              Gross Commissions (कुल कमीशन)
+              Gross Commissions
             </span>
             <div className="text-2xl font-black font-mono text-indigo-300 mt-1">
               +{formatINR(todayGross)}
@@ -141,7 +141,7 @@ export const ProfitChartSection = () => {
         <div className="bg-slate-900/90 border border-rose-500/30 p-5 rounded-2xl shadow-xl flex items-center justify-between">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-rose-400">
-              Shop Expenses (दुकान खर्च)
+              Shop Expenses
             </span>
             <div className="text-2xl font-black font-mono text-rose-400 mt-1">
               -{formatINR(todayExpenses)}
@@ -158,7 +158,7 @@ export const ProfitChartSection = () => {
         <div className="bg-slate-900/90 border border-sky-500/30 p-5 rounded-2xl shadow-xl flex items-center justify-between">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
-              7-Day Total Profit (7 दिन का मुनाफ़ा)
+              7-Day Total Profit
             </span>
             <div className="text-2xl font-black font-mono text-sky-400 mt-1">
               +{formatINR(totalWeeklyProfit)}
@@ -181,7 +181,7 @@ export const ProfitChartSection = () => {
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                Daily Net Profit Trend (दैनिक मुनाफ़ा ग्राफ़)
+                Daily Net Profit Trend
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
                 Gross Commissions earned vs Net Profit after shop expenses
@@ -232,7 +232,7 @@ export const ProfitChartSection = () => {
                 <Line
                   type="monotone"
                   dataKey="netProfit"
-                  name="Net Profit (शुद्ध लाभ)"
+                  name="Net Profit"
                   stroke="#10b981"
                   strokeWidth={3}
                   dot={{ r: 5, fill: '#10b981' }}
@@ -247,7 +247,7 @@ export const ProfitChartSection = () => {
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-                Portal-wise Commission Share (पोर्टल अनुसार कमाई)
+                Commission by Service
               </h3>
               <p className="text-xs text-slate-400 mt-0.5">
                 Which Money Transfer portal generated the highest commissions
@@ -304,14 +304,14 @@ export const ProfitChartSection = () => {
       {/* Daily Volume vs Profit Insight Table */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-3">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider pb-3 border-b border-slate-800">
-          7-Day Volume & Profit Statement (पिछले 7 दिनों का मुनाफ़ा विवरण)
+          7-Day Volume and Profit
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/60">
-                <th className="py-2.5 px-3">Date (तारीख)</th>
+                <th className="py-2.5 px-3">Date</th>
                 <th className="py-2.5 px-3 text-right">DMT Transfer Volume</th>
                 <th className="py-2.5 px-3 text-right">AEPS Withdrawal Volume</th>
                 <th className="py-2.5 px-3 text-right">Gross Commission</th>

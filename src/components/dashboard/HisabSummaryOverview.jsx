@@ -1,21 +1,72 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { useHisab } from '../../context/HisabContext';
 import { formatINR } from '../../utils/formatters';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend
+} from 'recharts';
 import {
   CreditCard,
   Landmark,
   ArrowDownLeft,
   ArrowUpRight,
   Receipt,
-  WalletCards,
   Coins,
-  Sparkles,
-  TrendingUp,
-  HelpCircle,
   Layers,
   CalendarDays,
   Globe2
 } from 'lucide-react';
+
+const compactAxis = (value) => {
+  const amount = Number(value) || 0;
+  const sign = amount < 0 ? '-' : '';
+  const abs = Math.abs(amount);
+  if (abs >= 100000) {
+    const lakhs = abs / 100000;
+    const text = lakhs >= 10 ? String(Math.round(lakhs)) : String(Math.round(lakhs * 10) / 10);
+    return `${sign}${text}L`;
+  }
+  if (abs >= 1000) {
+    const thousands = abs / 1000;
+    const text = thousands >= 10 ? String(Math.round(thousands)) : String(Math.round(thousands * 10) / 10);
+    return `${sign}${text}k`;
+  }
+  return `${sign}${Math.round(abs)}`;
+};
+
+const parseDateKey = (dateStr) => {
+  const [year, month, day] = String(dateStr).split('-').map(Number);
+  return new Date(year, (month || 1) - 1, day || 1);
+};
+
+const toDateKey = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const ChartTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs shadow-lg dark:border-slate-700 dark:bg-slate-950">
+      <div className="mb-1 font-semibold text-slate-700 dark:text-slate-200">{label}</div>
+      {payload.map((item) => (
+        <div key={item.dataKey} className="font-mono" style={{ color: item.color }}>
+          {item.name}: {formatINR(item.value)}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
   const {
@@ -41,285 +92,287 @@ export const HisabSummaryOverview = ({ activeSection, setActiveSection }) => {
     allTimeLiyaList,
     summaryViewMode,
     setSummaryViewMode,
-    selectedDate
+    selectedDate,
+    incomes,
+    expenses,
+    isAllShops,
+    selectedBranchId,
+    getDateSummary,
+    theme
   } = useHisab();
 
   const isDaily = summaryViewMode === 'daily';
+  const axisColor = theme === 'dark' ? '#94a3b8' : '#64748b';
+  const gridColor = theme === 'dark' ? '#334155' : '#e2e8f0';
 
   const cards = [
     {
       id: 'portals',
-      title: '1. All Portals',
-      hindi: 'सभी 10 पोर्टल बैलेंस',
+      title: 'Portals',
+      hindi: 'Closing balance',
       amount: totalPortalsBalance,
-      subAmount: null,
       count: `${activePortals.length} IDs`,
       icon: CreditCard,
-      border: 'hover:border-amber-500/50',
-      activeBorder: 'ring-2 ring-amber-500 bg-amber-500/10 border-amber-500/60',
-      gradient: 'from-amber-500/10 via-slate-900 to-slate-900',
-      textColor: 'text-amber-600 dark:text-amber-400',
-      badgeBg: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30'
+      border: 'hover:border-amber-400',
+      activeBorder: 'ring-2 ring-amber-500 border-amber-400',
+      textColor: 'text-amber-600 dark:text-amber-400'
     },
     {
       id: 'accounts',
-      title: '2. Bank & Cash',
-      hindi: 'बैंक व गल्ला कैश',
+      title: 'Bank and cash',
+      hindi: 'Accounts plus drawer',
       amount: totalBankBalance,
-      subAmount: null,
       count: `${activeBankAccounts.length} A/C`,
       icon: Landmark,
-      border: 'hover:border-sky-500/50',
-      activeBorder: 'ring-2 ring-sky-500 bg-sky-500/10 border-sky-500/60',
-      gradient: 'from-sky-500/10 via-slate-900 to-slate-900',
-      textColor: 'text-sky-600 dark:text-sky-400',
-      badgeBg: 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30'
+      border: 'hover:border-sky-400',
+      activeBorder: 'ring-2 ring-sky-500 border-sky-400',
+      textColor: 'text-sky-600 dark:text-sky-400'
     },
     {
       id: 'jama',
-      title: '3. People Jama',
-      hindi: 'ग्राहकों का जमा कैश',
+      title: 'Deposits',
+      hindi: 'Money received',
       amount: isDaily ? totalJamaAmount : allTimeJamaAmount,
       subAmount: isDaily ? allTimeJamaAmount : totalJamaAmount,
-      subLabel: isDaily ? 'अब तक कुल' : 'इस दिन का',
-      count: isDaily ? `${activeJamaList.length} जमा (दिन)` : `${allTimeJamaList?.length || 0} कुल जमा`,
+      subLabel: isDaily ? 'All-time' : 'Today',
+      count: isDaily ? `${activeJamaList.length} today` : `${allTimeJamaList?.length || 0} total`,
       icon: ArrowDownLeft,
-      border: 'hover:border-emerald-500/50',
-      activeBorder: 'ring-2 ring-emerald-500 bg-emerald-500/10 border-emerald-500/60',
-      gradient: 'from-emerald-500/10 via-slate-900 to-slate-900',
+      border: 'hover:border-emerald-400',
+      activeBorder: 'ring-2 ring-emerald-500 border-emerald-400',
       textColor: 'text-emerald-600 dark:text-emerald-400',
-      badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30'
+      chip: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
     },
     {
       id: 'liya',
-      title: '4. People Liya',
-      hindi: 'उधार / निकासी दिया',
+      title: 'Withdrawals',
+      hindi: 'Money given',
       amount: isDaily ? totalLiyaAmount : allTimeLiyaAmount,
       subAmount: isDaily ? allTimeLiyaAmount : totalLiyaAmount,
-      subLabel: isDaily ? 'अब तक कुल' : 'इस दिन का',
-      count: isDaily ? `${activeLiyaList.length} निकासी (दिन)` : `${allTimeLiyaList?.length || 0} कुल निकासी`,
+      subLabel: isDaily ? 'All-time' : 'Today',
+      count: isDaily ? `${activeLiyaList.length} today` : `${allTimeLiyaList?.length || 0} total`,
       icon: ArrowUpRight,
-      border: 'hover:border-rose-500/50',
-      activeBorder: 'ring-2 ring-rose-500 bg-rose-500/10 border-rose-500/60',
-      gradient: 'from-rose-500/10 via-slate-900 to-slate-900',
+      border: 'hover:border-rose-400',
+      activeBorder: 'ring-2 ring-rose-500 border-rose-400',
       textColor: 'text-rose-600 dark:text-rose-400',
-      badgeBg: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30'
+      chip: 'bg-rose-500/15 text-rose-700 dark:text-rose-300'
     },
     {
       id: 'incomes',
-      title: '5. Other Income',
-      hindi: 'AEPS/DMT/PF/Xerox कमाई',
+      title: 'Income',
+      hindi: 'Service fees',
       amount: isDaily ? totalIncomes : allTimeIncomes,
       subAmount: isDaily ? allTimeIncomes : totalIncomes,
-      subLabel: isDaily ? 'अब तक कुल' : 'इस दिन का',
-      count: isDaily ? `${todaysIncomes.length} सेवा (दिन)` : `${isDaily ? todaysIncomes.length : 'कुल सेवा'}`,
+      subLabel: isDaily ? 'All-time' : 'Today',
+      count: isDaily ? `${todaysIncomes.length} today` : 'All services',
       icon: Coins,
-      border: 'hover:border-teal-500/50',
-      activeBorder: 'ring-2 ring-teal-500 bg-teal-500/10 border-teal-500/60',
-      gradient: 'from-teal-500/10 via-slate-900 to-slate-900',
+      border: 'hover:border-teal-400',
+      activeBorder: 'ring-2 ring-teal-500 border-teal-400',
       textColor: 'text-teal-600 dark:text-teal-400',
-      badgeBg: 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-500/20 dark:text-teal-300 dark:border-teal-500/30'
+      chip: 'bg-teal-500/15 text-teal-700 dark:text-teal-300'
     },
     {
       id: 'expenses',
-      title: '6. Shop Kharcha',
-      hindi: 'चाय, पेपर व दुकान खर्च',
+      title: 'Expenses',
+      hindi: 'Shop spend',
       amount: isDaily ? totalExpenses : allTimeExpenses,
       subAmount: isDaily ? allTimeExpenses : totalExpenses,
-      subLabel: isDaily ? 'अब तक कुल' : 'इस दिन का',
-      count: isDaily ? `${todaysExpenses.length} खर्च (दिन)` : `${isDaily ? todaysExpenses.length : 'कुल खर्च'}`,
+      subLabel: isDaily ? 'All-time' : 'Today',
+      count: isDaily ? `${todaysExpenses.length} today` : 'All expenses',
       icon: Receipt,
-      border: 'hover:border-pink-500/50',
-      activeBorder: 'ring-2 ring-pink-500 bg-pink-500/10 border-pink-500/60',
-      gradient: 'from-pink-500/10 via-slate-900 to-slate-900',
+      border: 'hover:border-pink-400',
+      activeBorder: 'ring-2 ring-pink-500 border-pink-400',
       textColor: 'text-pink-600 dark:text-pink-400',
-      badgeBg: 'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-500/20 dark:text-pink-300 dark:border-pink-500/30'
+      chip: 'bg-pink-500/15 text-pink-700 dark:text-pink-300'
     }
   ];
 
-  const currentNetCapital = isDaily ? netTotalCapital : allTimeNetTotalCapital;
   const currentJamaVal = isDaily ? totalJamaAmount : allTimeJamaAmount;
   const currentLiyaVal = isDaily ? totalLiyaAmount : allTimeLiyaAmount;
 
+  const weekData = useMemo(() => {
+    const anchor = parseDateKey(selectedDate);
+    const rows = [];
+    for (let offset = 6; offset >= 0; offset -= 1) {
+      const day = new Date(anchor);
+      day.setDate(anchor.getDate() - offset);
+      const dateKey = toDateKey(day);
+      const summary = getDateSummary(dateKey);
+      const inShop = (row) => isAllShops || row.branchId === selectedBranchId;
+      const income = (incomes || [])
+        .filter((row) => inShop(row) && row.date === dateKey)
+        .reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+      const spend = (expenses || [])
+        .filter((row) => inShop(row) && row.date === dateKey)
+        .reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+      rows.push({
+        label: day.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+        deposits: summary.jama,
+        withdrawals: summary.liya,
+        income,
+        expenses: spend
+      });
+    }
+    return rows;
+  }, [selectedDate, getDateSummary, incomes, expenses, isAllShops, selectedBranchId]);
+
   return (
-    <div className="space-y-3.5">
-      
-      {/* Top Bar Switcher: Daily (आज/चुना दिन) vs All-Time Cumulative (अब तक का कुल) */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-0.5">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Summary View Mode:</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-indigo-500" />
+            Summary
           </span>
-          <span className="text-[11px] font-semibold text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700">
-            {isDaily ? '📅 इस दिन का हिसाब' : '🌐 अब तक का कुल रिकॉर्ड'}
+          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+            {isDaily ? "This day's books" : 'All-time records'}
           </span>
         </div>
 
-        {/* Dual Mode Toggle Switcher */}
-        <div className="flex items-center p-1 bg-slate-950/90 border border-slate-800 rounded-xl">
+        <div className="flex items-center p-0.5 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg">
           <button
             type="button"
             onClick={() => setSummaryViewMode('daily')}
-            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
               isDaily
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                ? 'bg-indigo-600 text-white'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
             }`}
           >
             <CalendarDays className="w-3.5 h-3.5" />
-            <span>📅 आज / चुना दिन (Daily)</span>
+            This day
           </button>
           <button
             type="button"
             onClick={() => setSummaryViewMode('all_time')}
-            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
               !isDaily
-                ? 'bg-emerald-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                ? 'bg-emerald-600 text-white'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'
             }`}
           >
             <Globe2 className="w-3.5 h-3.5" />
-            <span>🌐 अब तक कुल (All-Time)</span>
+            All-time
           </button>
         </div>
       </div>
 
-      {/* 6 Core Pillars Metric Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {cards.map((c) => {
-          const Icon = c.icon;
-          const isSelected = activeSection === c.id;
-
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          const isSelected = activeSection === card.id;
           return (
-            <div
-              key={c.id}
-              onClick={() => setActiveSection && setActiveSection(c.id)}
-              className={`p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900/90 border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md relative overflow-hidden group flex flex-col justify-between ${
+            <button
+              key={card.id}
+              type="button"
+              onClick={() => setActiveSection && setActiveSection(card.id)}
+              className={`text-left px-2.5 py-2 rounded-xl bg-white dark:bg-slate-900 border transition-all cursor-pointer shadow-sm hover:shadow ${
                 isSelected
-                  ? c.activeBorder
-                  : `border-slate-200 dark:border-slate-800 ${c.border}`
+                  ? card.activeBorder
+                  : `border-slate-200 dark:border-slate-800 ${card.border}`
               }`}
             >
-              <div>
-                <div className="flex items-start justify-between gap-1.5">
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1">
-                      {c.title}
-                    </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate font-medium">
-                      {c.hindi}
-                    </div>
-                  </div>
-
-                  <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shrink-0 group-hover:scale-110 transition-transform">
-                    <Icon className={`w-3.5 h-3.5 ${c.textColor}`} />
-                  </div>
-                </div>
-
-                <div className="mt-3 flex items-baseline justify-between gap-1">
-                  <div className={`text-lg sm:text-xl font-black font-mono tracking-tight truncate ${c.textColor}`}>
-                    {formatINR(c.amount)}
-                  </div>
-
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 border ${c.badgeBg}`}>
-                    {c.count}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 truncate">
+                  {card.title}
+                </span>
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${card.textColor}`} />
               </div>
-
-              {/* Sub-label showing the other balance (Daily vs All-Time) */}
-              {c.subAmount !== null && (
-                <div className="mt-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-1.5 bg-slate-100/90 dark:bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-slate-800">
-                  <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 tracking-tight truncate">
-                    {c.subLabel}:
-                  </span>
-                  <span className={`text-xs font-mono font-black ${c.textColor}`}>
-                    {formatINR(c.subAmount)}
-                  </span>
+              <div className={`mt-1 text-sm sm:text-base font-black font-mono leading-none tracking-tight ${card.textColor}`}>
+                {formatINR(card.amount)}
+              </div>
+              <div className="mt-1 text-[10px] text-slate-500 truncate">
+                {card.hindi} · {card.count}
+              </div>
+              {card.subAmount != null && (
+                <div className={`mt-1.5 inline-flex max-w-full items-baseline gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-tight ${card.chip}`}>
+                  <span className="font-semibold">{card.subLabel}</span>
+                  <span className="font-mono">{formatINR(card.subAmount)}</span>
                 </div>
               )}
-            </div>
+            </button>
           );
         })}
       </div>
 
-      {/* Grand Net Total & Formula Banner */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-50/90 via-white to-emerald-50/50 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 border border-indigo-200 dark:border-indigo-500/40 shadow-sm dark:shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white shadow-md shadow-indigo-600/20 shrink-0">
-            <WalletCards className="w-6 h-6" />
+      <div className="px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            {isDaily ? 'Daily net capital' : 'All-time net capital'}
           </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-indigo-950 dark:text-indigo-200">
-                Total Available Capital / Net Hisab ({isDaily ? 'दैनिक शुद्ध पूँजी' : 'अब तक कुल शुद्ध पूँजी'})
-              </span>
-              <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-500/30 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                {isDaily ? 'Live Daily Tally' : 'All-Time Net Balance'}
-              </span>
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-snug">
+            Portals {formatINR(totalPortalsBalance)} + Bank and cash {formatINR(totalBankBalance)} + {isDaily ? 'credit given' : 'all-time credit'} {formatINR(currentLiyaVal)} − {isDaily ? 'deposits' : 'all-time deposits'} {formatINR(currentJamaVal)}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setSummaryViewMode('daily')}
+            className={`px-3 py-1.5 rounded-lg border text-left cursor-pointer ${
+              isDaily
+                ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-500/10'
+                : 'border-slate-200 dark:border-slate-800'
+            }`}
+          >
+            <div className="text-[10px] uppercase font-bold text-slate-500">Daily</div>
+            <div className="text-sm font-black font-mono text-emerald-600 dark:text-emerald-400">
+              {formatINR(netTotalCapital)}
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-medium flex flex-wrap items-center gap-1.5">
-              <span className="bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-500/20 font-bold">
-                पोर्टल ({formatINR(totalPortalsBalance)})
-              </span>
-              <span className="text-slate-400 font-bold">+</span>
-              <span className="bg-sky-100 text-sky-900 dark:bg-sky-500/15 dark:text-sky-300 px-2 py-0.5 rounded-md border border-sky-200 dark:border-sky-500/20 font-bold">
-                बैंक/कैश ({formatINR(totalBankBalance)})
-              </span>
-              <span className="text-slate-400 font-bold">+</span>
-              <span className="bg-rose-100 text-rose-900 dark:bg-rose-500/15 dark:text-rose-300 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-500/20 font-bold">
-                {isDaily ? 'आज का उधार' : 'कुल बाजार उधार'} ({formatINR(currentLiyaVal)})
-              </span>
-              <span className="text-slate-400 font-bold">-</span>
-              <span className="bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-500/20 font-bold">
-                {isDaily ? 'आज की जमा' : 'कुल ग्राहक जमा'} ({formatINR(currentJamaVal)})
-              </span>
-            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSummaryViewMode('all_time')}
+            className={`px-3 py-1.5 rounded-lg border text-left cursor-pointer ${
+              !isDaily
+                ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
+                : 'border-slate-200 dark:border-slate-800'
+            }`}
+          >
+            <div className="text-[10px] uppercase font-bold text-slate-500">All-time</div>
+            <div className="text-sm font-black font-mono text-cyan-600 dark:text-cyan-400">
+              {formatINR(allTimeNetTotalCapital)}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3">
+          <div className="mb-2">
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Deposits and withdrawals</h3>
+            <p className="text-[11px] text-slate-500">Bar chart for the last 7 days</p>
+          </div>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={weekData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2}>
+                <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={compactAxis} tick={{ fill: axisColor, fontSize: 11 }} width={42} axisLine={false} tickLine={false} />
+                <Tooltip content={<ChartTooltip />} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="deposits" name="Deposits" fill="#059669" radius={[4, 4, 0, 0]} maxBarSize={18} />
+                <Bar dataKey="withdrawals" name="Withdrawals" fill="#e11d48" radius={[4, 4, 0, 0]} maxBarSize={18} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Dual Net Capital Displays (Daily + All-Time Side-by-Side) */}
-        <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
-          {/* Card 1: Daily Net Capital */}
-          <div
-            onClick={() => setSummaryViewMode('daily')}
-            className={`px-3.5 sm:px-4 py-2.5 rounded-xl border transition-all cursor-pointer shadow-sm ${
-              isDaily
-                ? 'bg-indigo-600/10 dark:bg-slate-950/95 border-indigo-500 ring-2 ring-indigo-500/50 shadow-indigo-500/10'
-                : 'bg-white/60 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 opacity-75 hover:opacity-100 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center gap-1.5">
-              <div className={`text-[10px] uppercase font-bold ${isDaily ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400'}`}>
-                आज की शुद्ध पूँजी (Daily)
-              </div>
-              {isDaily && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />}
-            </div>
-            <div className="text-lg sm:text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {formatINR(netTotalCapital)}
-            </div>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3">
+          <div className="mb-2">
+            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Income and expenses</h3>
+            <p className="text-[11px] text-slate-500">Line graph for the last 7 days</p>
           </div>
-
-          {/* Card 2: All-Time Net Capital */}
-          <div
-            onClick={() => setSummaryViewMode('all_time')}
-            className={`px-3.5 sm:px-4 py-2.5 rounded-xl border transition-all cursor-pointer shadow-sm ${
-              !isDaily
-                ? 'bg-emerald-600/10 dark:bg-slate-950/95 border-emerald-500 ring-2 ring-emerald-500/50 shadow-emerald-500/10'
-                : 'bg-white/60 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 opacity-75 hover:opacity-100 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center gap-1.5">
-              <div className={`text-[10px] uppercase font-bold ${!isDaily ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}`}>
-                अब तक कुल (All-Time)
-              </div>
-              {!isDaily && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
-            </div>
-            <div className="text-lg sm:text-xl font-black font-mono text-cyan-600 dark:text-cyan-400 mt-0.5">
-              {formatINR(allTimeNetTotalCapital)}
-            </div>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={weekData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid stroke={gridColor} strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={compactAxis} tick={{ fill: axisColor, fontSize: 11 }} width={42} axisLine={false} tickLine={false} />
+                <Tooltip content={<ChartTooltip />} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Line type="monotone" dataKey="income" name="Income" stroke="#0d9488" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#db2777" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

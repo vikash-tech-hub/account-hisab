@@ -43,7 +43,7 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
     initialAmount: 0
   });
 
-  const yesterdayDate = getPreviousDateString ? getPreviousDateString(selectedDate) : 'कल';
+  const yesterdayDate = getPreviousDateString ? getPreviousDateString(selectedDate) : 'Yesterday';
 
   const handleKeyDown = (e, index) => {
     if (e.key === 'Enter' || e.key === 'ArrowDown') {
@@ -71,11 +71,11 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
           <div className="flex items-center gap-2">
             <Landmark className="w-5 h-5 text-sky-400" />
             <h3 className="text-lg font-bold text-white tracking-wide">
-              2. Bank Accounts & Cash in Hand Balance (बैंक व गल्ला कैश)
+              2. Bank accounts and cash in hand
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            कल का क्लोजिंग = आज का ओपनिंग | सिर्फ आज का बैंक या गल्ले का बैलेंस भरें
+            Yesterday's closing becomes today's opening. Enter only today's bank or cash balance.
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>आज का बैलेंस (Quick)</span>
+              <span>Today's balance</span>
             </button>
             <button
               onClick={() => setEntryMode('detailed')}
@@ -111,10 +111,10 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
           <button
             onClick={carryForwardAllYesterday}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-bold transition-all shadow-sm cursor-pointer"
-            title="कल का क्लोजिंग बैलेंस आज के ओपनिंग में कॉपी करें"
+            title="Copy yesterday's closing into today's opening"
           >
             <Zap className="w-4 h-4 text-sky-400" />
-            <span>⚡ कल का बैलेंस लाएं ({yesterdayDate})</span>
+            <span>Use yesterday's balance ({yesterdayDate})</span>
           </button>
 
           {/* Cash Denomination Calculator Toolbar Button */}
@@ -126,15 +126,15 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
               setCashCalcModal({
                 isOpen: true,
                 accountId: cashAcc?.id,
-                accountName: cashAcc?.name || 'Cash in Hand (गल्ला कैश)',
+                accountName: cashAcc?.name || 'Cash in Hand',
                 initialAmount: curClosing
               });
             }}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-white border border-emerald-500/40 text-xs font-bold transition-all shadow-sm cursor-pointer"
-            title="गल्ले के 500, 200, 100 आदि नोट गिनें"
+            title="Count 500, 200, 100, and other notes"
           >
             <Calculator className="w-4 h-4 text-emerald-400" />
-            <span>💵 नोट कैलकुलेटर (गिनें)</span>
+            <span>💵   ()</span>
           </button>
 
           {/* Total Badge */}
@@ -149,7 +149,7 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
           <button
             onClick={() => setIsAddAccountModalOpen(true)}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md transition-all cursor-pointer"
-            title="नया बैंक खाता या गल्ला रजिस्टर जोड़ें"
+            title="Add a bank account or cash drawer"
           >
             <Plus className="w-4 h-4" />
             <span>+ Add Account</span>
@@ -164,9 +164,9 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
             {entryMode === 'direct' ? (
               <tr className="border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/60">
                 <th className="py-3 px-3">Account Name & Type</th>
-                <th className="py-3 px-3 text-right">🌅 कल का बैलेंस / सुबह का ओपनिंग (₹)</th>
-                <th className="py-3 px-3 text-right text-sky-400">🏦 आज का लाइव बैलेंस (Today's Balance ₹)</th>
-                <th className="py-3 px-3 text-right">🔄 आज का फर्क (Net Change)</th>
+                <th className="py-3 px-3 text-right">Opening balance (₹)</th>
+                <th className="py-3 px-3 text-right text-sky-400">Today's balance (₹)</th>
+                <th className="py-3 px-3 text-right">Change today</th>
                 <th className="py-3 px-3 text-right">Action</th>
               </tr>
             ) : (
@@ -212,7 +212,7 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
                         <div className="inline-flex items-center justify-end">
                           <span
                             className="font-mono font-semibold text-slate-400 bg-slate-950/80 border border-slate-800/80 px-3 py-1.5 rounded-lg text-xs cursor-not-allowed select-none"
-                            title="कल का क्लोजिंग बैलेंस (Locked & Auto-Loaded)"
+                            title="Yesterday's closing (locked)"
                           >
                             🔒 {formatINR(acc.opening)}
                           </span>
@@ -245,10 +245,10 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
                                 });
                               }}
                               className="px-2 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/35 text-emerald-300 hover:text-white border border-emerald-500/40 transition-all hover:scale-105 flex items-center gap-1 shadow-sm cursor-pointer"
-                              title="नोट गिनें / 500, 200, 100 आदि कैलकुलेटर"
+                              title="Count notes"
                             >
                               <Calculator className="w-3.5 h-3.5 text-emerald-400" />
-                              <span className="text-[10px] font-bold hidden xl:inline">नोट गिनें</span>
+                              <span className="text-[10px] font-bold hidden xl:inline">Count notes</span>
                             </button>
                           )}
                         </div>
@@ -267,7 +267,7 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
                         >
                           {diff > 0 && <TrendingUp className="w-3 h-3 text-emerald-400" />}
                           {diff < 0 && <TrendingDown className="w-3 h-3 text-rose-400" />}
-                          {diff > 0 ? `+${formatINR(diff)}` : diff < 0 ? `-${formatINR(Math.abs(diff))}` : 'बराबर (₹0)'}
+                          {diff > 0 ? `+${formatINR(diff)}` : diff < 0 ? `-${formatINR(Math.abs(diff))}` : 'Even (₹0)'}
                         </span>
                       </td>
                     </>
@@ -343,13 +343,13 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
               className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>⬅️ पिछला: 10 पोर्टल</span>
+              <span>Back: Portals</span>
             </button>
           )}
 
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <span className="w-2 h-2 rounded-full bg-sky-400" />
-            <span>कुल बैंक व गल्ला:</span>
+            <span>Total bank and cash:</span>
             <span className="font-mono font-bold text-sky-300 text-sm">{formatINR(totalBankBalance)}</span>
           </div>
         </div>
@@ -359,29 +359,29 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
             onClick={() => {
               triggerLoader({
                 duration: 2200,
-                subtitle: '🏦 बैंक खाते व गल्ला कैश सुरक्षित हो रहा है...',
-                onFinish: () => showToast('✅ सभी बैंक खाते व गल्ला कैश सुरक्षित हो गए!')
+                subtitle: 'Saving bank accounts and cash...',
+                onFinish: () => showToast('Bank accounts and cash saved.')
               });
             }}
             className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
           >
-            <span>💾 सेव करें (Save)</span>
+            <span>Save</span>
           </button>
 
           <button
             onClick={() => {
               triggerLoader({
                 duration: 2400,
-                subtitle: '🏦 बैंक व गल्ला सुरक्षित हुआ! 👥 ग्राहक खाता बही लोड हो रही है...',
+                subtitle: 'Bank and cash saved. Opening customer accounts...',
                 onFinish: () => {
-                  showToast('✨ बैंक व गल्ला कैश सेव हो गया! अगला: ग्राहक खाता (जमा/उधार)');
+                  showToast('Bank and cash saved. Next: customer accounts.');
                   if (onNext) onNext();
                 }
               });
             }}
             className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-slate-950 font-black text-xs shadow-lg shadow-sky-500/20 transition-all flex items-center gap-2 cursor-pointer group"
           >
-            <span>💾 सेव करें और अगला: ग्राहक खाता (Save & Next)</span>
+            <span>Save and next: Customers</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
@@ -397,7 +397,7 @@ export const BankAccountsPillar = ({ onNext, onPrev }) => {
           onApplyCash={(totalCalculated) => {
             if (cashCalcModal.accountId) {
               setBankAccountDirectTodayBalance(cashCalcModal.accountId, totalCalculated);
-              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} गल्ला कैश में सेट कर दिया गया!`, 'success');
+              showToast && showToast(`✅ ₹${formatINR(totalCalculated)} set as cash in hand.`, 'success');
             }
           }}
         />

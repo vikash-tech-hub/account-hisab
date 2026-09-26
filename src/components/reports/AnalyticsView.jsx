@@ -217,7 +217,7 @@ export const AnalyticsView = ({ onOpenPrintModal }) => {
 
         <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-xl flex items-center justify-between">
           <div>
-            <h4 className="text-sm font-bold text-white">Customer Khata Ledger CSV Export</h4>
+            <h4 className="text-sm font-bold text-white">Customer ledger CSV export</h4>
             <p className="text-xs text-slate-400 mt-1">
               Export all customer accounts, outstanding credit dues, and advance balances.
             </p>
@@ -226,7 +226,7 @@ export const AnalyticsView = ({ onOpenPrintModal }) => {
               className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-colors"
             >
               <Download className="w-3.5 h-3.5 text-sky-400" />
-              <span>Download Customer Khata CSV</span>
+              <span>Download customer ledger CSV</span>
             </button>
           </div>
           <FileSpreadsheet className="w-10 h-10 text-sky-400 shrink-0 ml-4 opacity-80" />

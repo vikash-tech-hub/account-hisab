@@ -31,7 +31,7 @@ export const PrintableSlip = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Daily Hisab Slip & Receipt"
+      title="Daily accounts slip"
       subtitle="Printable slip for shop daily records and WhatsApp sharing"
       maxWidth="max-w-2xl"
     >
@@ -81,7 +81,7 @@ export const PrintableSlip = ({ isOpen, onClose }) => {
               {activeBranch.address} | Phone: {activeBranch.phone}
             </p>
             <div className="inline-block bg-slate-900 text-white text-xs font-bold px-3 py-0.5 rounded-full mt-1">
-              DAILY HISAB STATEMENT & CLOSING SLIP
+              DAILY ACCOUNTS STATEMENT AND CLOSING SLIP
             </div>
           </div>
 
@@ -110,7 +110,7 @@ export const PrintableSlip = ({ isOpen, onClose }) => {
                   <td className="py-1 text-right font-mono font-bold">{formatINR(dailySummary.openingCash)}</td>
                 </tr>
                 <tr>
-                  <td className="py-1 text-emerald-800 font-medium">(+) Customer Cash Deposits (Jama/DMT):</td>
+                  <td className="py-1 text-emerald-800 font-medium">(+) Customer cash deposits:</td>
                   <td className="py-1 text-right font-mono font-bold text-emerald-700">+{formatINR(dailySummary.totalJamaCash)}</td>
                 </tr>
                 <tr>
@@ -118,7 +118,7 @@ export const PrintableSlip = ({ isOpen, onClose }) => {
                   <td className="py-1 text-right font-mono font-bold text-emerald-700">+{formatINR(dailySummary.totalTransfersIn)}</td>
                 </tr>
                 <tr>
-                  <td className="py-1 text-rose-800 font-medium">(-) AEPS Cash Payouts to Customers (Liya):</td>
+                  <td className="py-1 text-rose-800 font-medium">(−) AEPS cash payouts to customers:</td>
                   <td className="py-1 text-right font-mono font-bold text-rose-700">-{formatINR(dailySummary.totalLiyaCash)}</td>
                 </tr>
                 <tr>

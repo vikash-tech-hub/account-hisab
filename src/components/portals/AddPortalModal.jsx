@@ -31,7 +31,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
 
   const handleSave = (addAnother = false) => {
     if (!formData.name.trim()) {
-      showToast('कृपया पोर्टल का नाम भरें (Please enter portal name)', 'error');
+      showToast('Enter the portal name', 'error');
       const inputName = document.getElementById('new-portal-name-input');
       if (inputName) inputName.focus();
       return;
@@ -56,7 +56,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
         opening: '',
         minBalance: 2000
       });
-      showToast(`✅ पोर्टल #${activePortals.length + 1} जोड़ा गया! अगला भरें।`, 'success');
+      showToast(`✅ Portal #${activePortals.length + 1} added. Enter the next one.`, 'success');
       setTimeout(() => {
         const inputName = document.getElementById('new-portal-name-input');
         if (inputName) {
@@ -65,7 +65,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
         }
       }, 50);
     } else {
-      showToast(`✅ पोर्टल "${formData.name}" सफलतापूर्वक जोड़ा गया!`, 'success');
+      showToast(`✅  "${formData.name}" added.`, 'success');
       onClose();
     }
   };
@@ -97,7 +97,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span>नया पोर्टल / BC ID जोड़ें (Add Portal)</span>
+                <span>Add portal / BC ID</span>
                 {addedCount > 0 && (
                   <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/30">
                     +{addedCount} Added
@@ -105,7 +105,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
                 )}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Enter दबाने पर अगला फ़ील्ड अपने-आप फ़ोकस होगा
+                Press Enter to move to the next field
               </p>
             </div>
           </div>
@@ -122,7 +122,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                पोर्टल का नाम (Portal Name) *
+                Portal name *
               </label>
               <input
                 id="new-portal-name-input"
@@ -136,7 +136,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
                 data-lpignore="true"
                 data-1p-ignore="true"
                 data-form-type="other"
-                placeholder="उदा. Spice Money / PayNearby"
+                placeholder="e.g. Spice Money / PayNearby"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 onKeyDown={(e) => handleKeyDown(e, 'new-portal-code-input')}
@@ -146,7 +146,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                एजेंट आईडी / कोड / PIN (Agent ID / PIN)
+                Agent ID / code / PIN
               </label>
               <input
                 id="new-portal-code-input"
@@ -159,7 +159,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
                 data-lpignore="true"
                 data-1p-ignore="true"
                 data-form-type="other"
-                placeholder="उदा. SM-984321 / PIN-1234"
+                placeholder="e.g. SM-984321 / PIN-1234"
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                 onKeyDown={(e) => handleKeyDown(e, 'new-portal-opening-input')}
@@ -171,7 +171,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                सुबह का ओपनिंग बैलेंस (Opening ₹)
+                Opening balance (₹)
               </label>
               <input
                 id="new-portal-opening-input"
@@ -184,7 +184,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
                 data-lpignore="true"
                 data-1p-ignore="true"
                 data-form-type="other"
-                placeholder="उदा. 25000"
+                placeholder="e.g. 25000"
                 value={formData.opening}
                 onChange={(e) => setFormData({ ...formData, opening: e.target.value })}
                 onKeyDown={(e) => handleKeyDown(e, 'new-portal-alert-input')}
@@ -194,7 +194,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                अलर्ट लिमिट (Min Balance Alert ₹)
+                Low-balance alert (₹)
               </label>
               <input
                 id="new-portal-alert-input"
@@ -207,7 +207,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
                 data-lpignore="true"
                 data-1p-ignore="true"
                 data-form-type="other"
-                placeholder="उदा. 2000"
+                placeholder="e.g. 2000"
                 value={formData.minBalance}
                 onChange={(e) => setFormData({ ...formData, minBalance: e.target.value })}
                 onKeyDown={(e) => handleKeyDown(e, null, true)}
@@ -220,7 +220,7 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
         {/* Footer Actions */}
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/80 flex flex-wrap items-center justify-between gap-2.5">
           <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-            कुल चालू पोर्टल: <strong className="text-slate-900 dark:text-white">{activePortals.length}</strong>
+            Portals added: <strong className="text-slate-900 dark:text-white">{activePortals.length}</strong>
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
@@ -229,14 +229,14 @@ export const AddPortalModal = ({ isOpen, onClose }) => {
               onClick={onClose}
               className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              रद्द करें (Cancel)
+              Cancel
             </button>
 
             <button
               type="button"
               onClick={() => handleSave(true)}
               className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-300 font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer border border-amber-500/30"
-              title="सेव करके तुरंत अगला पोर्टल जोड़ें (Enter दबाने पर भी यही होगा)"
+              title="Save and add the next portal (Enter does the same)"
             >
               <Plus className="w-3.5 h-3.5 text-amber-400" />
               <span>+ Save & Add Next</span>

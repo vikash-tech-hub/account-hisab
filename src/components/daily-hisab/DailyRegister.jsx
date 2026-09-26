@@ -49,7 +49,7 @@ export const DailyRegister = ({ onOpenTransactionModal, onOpenCashCounter }) => 
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl font-bold text-white tracking-wide">
-              Daily Hisab Register
+              Daily accounts register
             </h2>
             <Badge variant={isClosed ? 'danger' : 'success'}>
               {isClosed ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
@@ -223,7 +223,7 @@ export const DailyRegister = ({ onOpenTransactionModal, onOpenCashCounter }) => 
                     <span className="font-mono font-semibold">{formatINR(dailySummary.openingCash)}</span>
                   </div>
                   <div className="flex justify-between text-slate-300">
-                    <span>2. Customer Cash Deposits (Jama/DMT):</span>
+                    <span>2. Customer cash deposits:</span>
                     <span className="font-mono font-semibold text-emerald-400">
                       +{formatINR(dailySummary.totalJamaCash)}
                     </span>
@@ -255,7 +255,7 @@ export const DailyRegister = ({ onOpenTransactionModal, onOpenCashCounter }) => 
 
                 <div className="space-y-2 text-xs pt-2 border-t border-slate-800/80">
                   <div className="flex justify-between text-slate-300">
-                    <span>1. AEPS Cash Payouts to Customers (Liya):</span>
+                    <span>1. AEPS cash payouts to customers:</span>
                     <span className="font-mono font-semibold text-rose-400">
                       -{formatINR(dailySummary.totalLiyaCash)}
                     </span>

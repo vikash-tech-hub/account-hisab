@@ -73,7 +73,7 @@ export const StatCard = ({
               {title}
             </span>
             {titleHindi && (
-              <span className="text-[11px] text-slate-400 font-hindi">({titleHindi})</span>
+              <span className="text-[11px] text-slate-400">({titleHindi})</span>
             )}
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-mono">

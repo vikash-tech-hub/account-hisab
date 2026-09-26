@@ -71,7 +71,7 @@ export const CustomerLedger = ({ onOpenTransactionModal }) => {
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl font-bold text-white tracking-wide">
-              Customer Khata & Ledger
+              Customer ledger
             </h2>
             <Badge variant="purple">
               <Users className="w-3.5 h-3.5" />
@@ -89,7 +89,7 @@ export const CustomerLedger = ({ onOpenTransactionModal }) => {
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Khata CSV</span>
+            <span>Ledger CSV</span>
           </button>
 
           <button
@@ -97,7 +97,7 @@ export const CustomerLedger = ({ onOpenTransactionModal }) => {
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Add Customer Khata</span>
+            <span>+ Add customer</span>
           </button>
         </div>
       </div>
